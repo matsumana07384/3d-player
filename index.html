@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Player</title>
+  <style>
+    :root {
+      --bg: #fff8e7;
+      --surface: #ffffff;
+      --text: #5b422c;
+      --accent: #f7dfa8;
+      --accent-strong: #8b5e3c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      padding: 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Hiragino Maru Gothic ProN", "BIZ UDGothic", "Yu Gothic", sans-serif;
+    }
+
+    main {
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+      font-size: clamp(28px, 8vw, 52px);
+      line-height: 1.1;
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 180px;
+      min-height: 56px;
+      padding: 14px 28px;
+      color: var(--text);
+      background: var(--surface);
+      border: 3px solid var(--accent-strong);
+      border-radius: 999px;
+      box-shadow: 0 5px 0 var(--accent-strong);
+      font-size: 20px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.16s ease;
+    }
+
+    a:hover {
+      background: var(--accent);
+    }
+
+    a:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 var(--accent-strong);
+    }
+
+    a:focus-visible {
+      outline: 3px solid #9ed9b5;
+      outline-offset: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>3D Player</h1>
+    <a href="./pompom/">pompom</a>
+  </main>
+</body>
+
+</html>

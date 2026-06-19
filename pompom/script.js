@@ -178,6 +178,8 @@
   }
   const footL = makeFoot(-1);
   const footR = makeFoot(1);
+  const footLHome = footL.position.clone();
+  const footRHome = footR.position.clone();
 
   // tail (wags)
   const tailPivot = new THREE.Group();
@@ -232,6 +234,7 @@
   let spinT = -1;   // 0..1 while spinning
   let waveT = -1;   // 0..~1.6s while waving
   let bothWaveT = -1; // 0..~1.8s while waving both hands
+  let kenkenpaT = -1; // 0..~2.1s while doing ken-ken-pa
   let winkT = -1;   // 0..~0.7s while winking
   let blinkT = 0;
   let nextBlink = 2.2;
@@ -248,6 +251,9 @@
   function bothWave() {
     if (bothWaveT < 0) bothWaveT = 0;
   }
+  function kenkenpa() {
+    if (kenkenpaT < 0) kenkenpaT = 0;
+  }
   function wink() {
     if (winkT < 0) winkT = 0;
   }
@@ -255,6 +261,7 @@
   document.getElementById('btnSpin').addEventListener('click', spin);
   document.getElementById('btnWave').addEventListener('click', wave);
   document.getElementById('btnBothWave').addEventListener('click', bothWave);
+  document.getElementById('btnKenkenpa').addEventListener('click', kenkenpa);
   document.getElementById('btnWink').addEventListener('click', wink);
 
   // --- color pickers -------------------------------------------
@@ -377,6 +384,51 @@
         armL.rotation.z = -2.2 - swing;
         armR.rotation.z =  2.2 + swing;
         head.rotation.z += Math.sin(bothWaveT * 9) * 0.08;
+      }
+    }
+
+    // ken-ken-pa: two one-foot hops, then a two-foot landing.
+    if (kenkenpaT >= 0) {
+      kenkenpaT += dt;
+      const duration = 2.1;
+      if (kenkenpaT > duration) {
+        kenkenpaT = -1;
+        chara.rotation.z = 0;
+        footL.position.copy(footLHome);
+        footR.position.copy(footRHome);
+        footL.rotation.set(0, 0, 0);
+        footR.rotation.set(0, 0, 0);
+      } else {
+        const step = kenkenpaT / (duration / 3);
+        const phase = Math.min(2, Math.floor(step));
+        const local = step - phase;
+        const hop = Math.sin(local * Math.PI);
+
+        bouncer.position.y = hop * (phase < 2 ? 0.65 : 0.45);
+        head.rotation.z += Math.sin(kenkenpaT * 10) * 0.08;
+
+        if (phase < 2) {
+          const sideLean = phase === 0 ? -1 : 1;
+          chara.rotation.z = sideLean * hop * 0.08;
+          armL.rotation.z = -0.9 - hop * 0.5;
+          armR.rotation.z =  0.9 + hop * 0.5;
+          footL.position.copy(footLHome);
+          footR.position.copy(footRHome);
+          footL.rotation.z = 0;
+          footR.rotation.z = 0;
+          footL.rotation.x = phase === 0 ? -hop * 0.35 : -0.75 * hop;
+          footR.rotation.x = phase === 0 ? -0.75 * hop : -hop * 0.35;
+        } else {
+          chara.rotation.z = 0;
+          armL.rotation.z = -1.2 + hop * 0.25;
+          armR.rotation.z =  1.2 - hop * 0.25;
+          footL.position.set(footLHome.x - 0.16 * hop, footLHome.y, footLHome.z);
+          footR.position.set(footRHome.x + 0.16 * hop, footRHome.y, footRHome.z);
+          footL.rotation.x = 0;
+          footR.rotation.x = 0;
+          footL.rotation.z =  hop * 0.22;
+          footR.rotation.z = -hop * 0.22;
+        }
       }
     }
 

@@ -45,7 +45,7 @@ header p {
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--cocoa);
-  background: #FFFFFF;
+  background: var(--mint);
   border: 3px solid var(--cocoa);
   border-radius: 999px;
   padding: 18px 40px;
@@ -62,9 +62,6 @@ header p {
   outline: 3px solid var(--mint);
   outline-offset: 2px;
 }
-.controls button.mint { background: var(--mint); }
-.controls button.coral { background: var(--coral); color: #fff; border-color: #C96B59; box-shadow: 0 5px 0 #C96B59; }
-.controls button.coral:active { box-shadow: 0 1px 0 #C96B59; }
 
 .palette {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
@@ -96,7 +93,6 @@ header p {
     border-width: 2px;
     box-shadow: 0 4px 0 var(--cocoa);
   }
-  .controls button.coral { box-shadow: 0 4px 0 #C96B59; }
   .palette { gap: 8px; }
   .color-pick { font-size: 13px; padding: 4px 8px 4px 12px; gap: 6px; }
   .color-pick input { width: 30px; height: 26px; }

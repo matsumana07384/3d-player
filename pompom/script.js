@@ -230,12 +230,12 @@
 
   // --- animation state machine ---------------------------------
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let jumpT = -1;   // 0..1 while jumping
-  let spinT = -1;   // 0..1 while spinning
-  let waveT = -1;   // 0..~1.6s while waving
-  let bothWaveT = -1; // 0..~1.8s while waving both hands
-  let kenkenpaT = -1; // 0..~2.1s while doing ken-ken-pa
-  let winkT = -1;   // 0..~0.7s while winking
+  let jumpT = -1;   // 0..1 while jumping (~1.09s)
+  let spinT = -1;   // 0..1 while spinning (~1.25s)
+  let waveT = -1;   // 0..~2.8s while waving
+  let bothWaveT = -1; // 0..~3.15s while waving both hands
+  let kenkenpaT = -1; // 0..~3.675s while doing ken-ken-pa
+  let winkT = -1;   // 0..~1.225s while winking
   let blinkT = 0;
   let nextBlink = 2.2;
 
@@ -344,16 +344,16 @@
     // wink (right eye closed + playful head tilt)
     if (winkT >= 0) {
       winkT += dt;
-      if (winkT > 0.7) winkT = -1;
+      if (winkT > 1.225) winkT = -1;
       else {
         eyeR.scale.y = 0.12;
-        head.rotation.z += Math.sin((winkT / 0.7) * Math.PI) * -0.18;
+        head.rotation.z += Math.sin((winkT / 1.225) * Math.PI) * -0.18;
       }
     }
 
     // jump (squash & stretch)
     if (jumpT >= 0) {
-      jumpT += dt * 1.6;
+      jumpT += dt * 0.914;
       if (jumpT >= 1) {
         jumpT = -1;
         bouncer.scale.set(1, 1, 1);
@@ -369,34 +369,34 @@
 
     // spin
     if (spinT >= 0) {
-      spinT += dt * 1.4;
+      spinT += dt * 0.8;
       if (spinT >= 1) spinT = -1;
-      else chara.rotation.y += dt * 14 * Math.sin(spinT * Math.PI);
+      else chara.rotation.y += dt * 8 * Math.sin(spinT * Math.PI);
     }
 
     // wave (right arm up, swinging side to side)
     if (waveT >= 0) {
       waveT += dt;
-      if (waveT > 1.6) waveT = -1;
-      else armR.rotation.z = 2.2 + Math.sin(waveT * 16) * 0.35;
+      if (waveT > 2.8) waveT = -1;
+      else armR.rotation.z = 2.2 + Math.sin(waveT * 9.143) * 0.35;
     }
 
     // both hands wave
     if (bothWaveT >= 0) {
       bothWaveT += dt;
-      if (bothWaveT > 1.8) bothWaveT = -1;
+      if (bothWaveT > 3.15) bothWaveT = -1;
       else {
-        const swing = Math.sin(bothWaveT * 18) * 0.32;
+        const swing = Math.sin(bothWaveT * 10.286) * 0.32;
         armL.rotation.z = -2.2 - swing;
         armR.rotation.z =  2.2 + swing;
-        head.rotation.z += Math.sin(bothWaveT * 9) * 0.08;
+        head.rotation.z += Math.sin(bothWaveT * 5.143) * 0.08;
       }
     }
 
     // ken-ken-pa: two one-foot hops, then a two-foot landing.
     if (kenkenpaT >= 0) {
       kenkenpaT += dt;
-      const duration = 2.1;
+      const duration = 3.675;
       if (kenkenpaT > duration) {
         kenkenpaT = -1;
         chara.rotation.z = 0;
@@ -411,7 +411,7 @@
         const hop = Math.sin(local * Math.PI);
 
         bouncer.position.y = hop * (phase < 2 ? 0.65 : 0.45);
-        head.rotation.z += Math.sin(kenkenpaT * 10) * 0.08;
+        head.rotation.z += Math.sin(kenkenpaT * 5.714) * 0.08;
 
         if (phase < 2) {
           const sideLean = phase === 0 ? -1 : 1;

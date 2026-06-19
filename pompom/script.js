@@ -257,12 +257,26 @@
   function wink() {
     if (winkT < 0) winkT = 0;
   }
-  document.getElementById('btnJump').addEventListener('click', jump);
-  document.getElementById('btnSpin').addEventListener('click', spin);
-  document.getElementById('btnWave').addEventListener('click', wave);
-  document.getElementById('btnBothWave').addEventListener('click', bothWave);
-  document.getElementById('btnKenkenpa').addEventListener('click', kenkenpa);
-  document.getElementById('btnWink').addEventListener('click', wink);
+  const commandButtons = {
+    jump: document.getElementById('btnJump'),
+    spin: document.getElementById('btnSpin'),
+    wave: document.getElementById('btnWave'),
+    bothWave: document.getElementById('btnBothWave'),
+    kenkenpa: document.getElementById('btnKenkenpa'),
+    wink: document.getElementById('btnWink'),
+  };
+  commandButtons.jump.addEventListener('click', jump);
+  commandButtons.spin.addEventListener('click', spin);
+  commandButtons.wave.addEventListener('click', wave);
+  commandButtons.bothWave.addEventListener('click', bothWave);
+  commandButtons.kenkenpa.addEventListener('click', kenkenpa);
+  commandButtons.wink.addEventListener('click', wink);
+
+  function setCommandButtonState(button, isPlaying) {
+    button.classList.toggle('is-playing', isPlaying);
+    button.disabled = isPlaying;
+    button.setAttribute('aria-busy', String(isPlaying));
+  }
 
   // --- color pickers -------------------------------------------
   const bindColor = (id, apply) =>
@@ -431,6 +445,13 @@
         }
       }
     }
+
+    setCommandButtonState(commandButtons.jump, jumpT >= 0);
+    setCommandButtonState(commandButtons.spin, spinT >= 0);
+    setCommandButtonState(commandButtons.wave, waveT >= 0);
+    setCommandButtonState(commandButtons.bothWave, bothWaveT >= 0);
+    setCommandButtonState(commandButtons.kenkenpa, kenkenpaT >= 0);
+    setCommandButtonState(commandButtons.wink, winkT >= 0);
 
     renderer.render(scene, camera);
   }

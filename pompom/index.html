@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D model</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div id="stage"></div>
+  <header>
+    <h1>pompom purin?</h1>
+    <p>一緒に遊んだり、色を変えられるよ</p>
+  </header>
+  <div class="ui-bottom">
+    <div class="palette">
+      <label class="color-pick" for="bodyColor">ボディ
+        <input type="color" id="bodyColor" value="#fffdf6" />
+      </label>
+      <label class="color-pick" for="hatColor">帽子
+        <input type="color" id="hatColor" value="#8b5e3c" />
+      </label>
+      <label class="color-pick" for="faceColor">目・鼻・口
+        <input type="color" id="faceColor" value="#5a3e2b" />
+      </label>
+    </div>
+    <div class="controls">
+      <button class="mint" id="btnJump">ジャンプ！</button>
+      <button id="btnWave">手をふる</button>
+      <button id="btnWink">ウィンク</button>
+      <button class="coral" id="btnSpin">くるっと回る</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="./script.js"></script>
+</body>
+
+</html>

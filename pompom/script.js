@@ -389,7 +389,6 @@
         const swing = Math.sin(bothWaveT * 10.286) * 0.32;
         armL.rotation.z = -2.2 - swing;
         armR.rotation.z =  2.2 + swing;
-        head.rotation.z += Math.sin(bothWaveT * 5.143) * 0.08;
       }
     }
 

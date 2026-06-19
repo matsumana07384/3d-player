@@ -231,6 +231,7 @@
   let jumpT = -1;   // 0..1 while jumping
   let spinT = -1;   // 0..1 while spinning
   let waveT = -1;   // 0..~1.6s while waving
+  let bothWaveT = -1; // 0..~1.8s while waving both hands
   let winkT = -1;   // 0..~0.7s while winking
   let blinkT = 0;
   let nextBlink = 2.2;
@@ -244,12 +245,16 @@
   function wave() {
     if (waveT < 0) waveT = 0;
   }
+  function bothWave() {
+    if (bothWaveT < 0) bothWaveT = 0;
+  }
   function wink() {
     if (winkT < 0) winkT = 0;
   }
   document.getElementById('btnJump').addEventListener('click', jump);
   document.getElementById('btnSpin').addEventListener('click', spin);
   document.getElementById('btnWave').addEventListener('click', wave);
+  document.getElementById('btnBothWave').addEventListener('click', bothWave);
   document.getElementById('btnWink').addEventListener('click', wink);
 
   // --- color pickers -------------------------------------------
@@ -361,6 +366,18 @@
       waveT += dt;
       if (waveT > 1.6) waveT = -1;
       else armR.rotation.z = 2.2 + Math.sin(waveT * 16) * 0.35;
+    }
+
+    // both hands wave
+    if (bothWaveT >= 0) {
+      bothWaveT += dt;
+      if (bothWaveT > 1.8) bothWaveT = -1;
+      else {
+        const swing = Math.sin(bothWaveT * 18) * 0.32;
+        armL.rotation.z = -2.2 - swing;
+        armR.rotation.z =  2.2 + swing;
+        head.rotation.z += Math.sin(bothWaveT * 9) * 0.08;
+      }
     }
 
     renderer.render(scene, camera);

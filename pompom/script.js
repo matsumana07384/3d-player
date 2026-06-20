@@ -306,14 +306,16 @@
       chara.rotation.x *= 0.95;
     }
 
+    // 毎フレーム必ず頭の回転をゼロにリセットする
+    head.rotation.set(0, 0, 0);
+
     if (!reduceMotion) {
       // idle bob & breathing
       bouncer.position.y = Math.sin(t * 2.2) * 0.05;
       body.scale.y = 0.92 + Math.sin(t * 2.2) * 0.012;
 
-      // head tilt
-      head.rotation.z = Math.sin(t * 0.9) * 0.06;
-      head.rotation.y = Math.sin(t * 0.6) * 0.08;
+      head.rotation.z += Math.sin(t * 0.9) * 0.06;
+      head.rotation.y += Math.sin(t * 0.6) * 0.08;
 
       // ears sway
       earL.rotation.z = -0.4 - Math.sin(t * 2.2 + 0.4) * 0.07;

@@ -207,6 +207,11 @@
   let dragging = false, moved = 0, px = 0, py = 0;
   let velY = 0; // inertia
 
+  // 複数アニメーションの重複実行を防ぐための判定
+  function isBusy() {
+    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || winkT >= 0 || touchT >= 0;
+  }
+
   stage.addEventListener('pointerdown', (e) => {
     dragging = true; moved = 0;
     px = e.clientX; py = e.clientY;
@@ -225,38 +230,30 @@
   stage.addEventListener('pointerup', () => {
     dragging = false;
     stage.classList.remove('grabbing');
-    if (moved < 6) jump(); // it was a tap
+    // タップ判定で、他のアニメーションが再生中でなければタッチイベントを発火
+    if (moved < 6 && !isBusy()) touchScreen();
   });
 
   // --- animation state machine ---------------------------------
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let jumpT = -1;   // 0..1 while jumping (~1.09s)
-  let spinT = -1;   // 0..1 while spinning (~1.25s)
-  let waveT = -1;   // 0..~2.8s while waving
-  let bothWaveT = -1; // 0..~3.15s while waving both hands
-  let kenkenpaT = -1; // 0..~3.675s while doing ken-ken-pa
-  let winkT = -1;   // 0..~1.225s while winking
+  let jumpT = -1;
+  let spinT = -1;
+  let waveT = -1;
+  let bothWaveT = -1;
+  let kenkenpaT = -1;
+  let winkT = -1;
+  let touchT = -1;  // タッチイベント用
   let blinkT = 0;
   let nextBlink = 2.2;
 
-  function jump() {
-    if (jumpT < 0) jumpT = 0;
-  }
-  function spin() {
-    if (spinT < 0) { spinT = 0; jump(); }
-  }
-  function wave() {
-    if (waveT < 0) waveT = 0;
-  }
-  function bothWave() {
-    if (bothWaveT < 0) bothWaveT = 0;
-  }
-  function kenkenpa() {
-    if (kenkenpaT < 0) kenkenpaT = 0;
-  }
-  function wink() {
-    if (winkT < 0) winkT = 0;
-  }
+  function jump() { if (!isBusy()) jumpT = 0; }
+  function spin() { if (!isBusy()) { spinT = 0; jumpT = 0; } }
+  function wave() { if (!isBusy()) waveT = 0; }
+  function bothWave() { if (!isBusy()) bothWaveT = 0; }
+  function kenkenpa() { if (!isBusy()) kenkenpaT = 0; }
+  function wink() { if (!isBusy()) winkT = 0; }
+  function touchScreen() { if (!isBusy()) touchT = 0; }
+
   const controlsPanel = document.querySelector('.ui-bottom');
   document.getElementById('btnJump').addEventListener('click', jump);
   document.getElementById('btnSpin').addEventListener('click', spin);
@@ -264,6 +261,7 @@
   document.getElementById('btnBothWave').addEventListener('click', bothWave);
   document.getElementById('btnKenkenpa').addEventListener('click', kenkenpa);
   document.getElementById('btnWink').addEventListener('click', wink);
+  document.getElementById('btnTouch').addEventListener('click', touchScreen);
 
   function setControlsHidden(isHidden) {
     controlsPanel.classList.toggle('is-hidden', isHidden);
@@ -287,8 +285,8 @@
   bindColor('faceColor', (c) => {
     nose.material.color.copy(c);
     mouthMat.color.copy(c);
-    eyeL.material.color.copy(c); // eyeR shares the material
-    starMat.color.copy(c);       // おしりの*も連動
+    eyeL.material.color.copy(c);
+    starMat.color.copy(c);
   });
 
   // --- main loop ------------------------------------------------
@@ -306,31 +304,36 @@
       chara.rotation.x *= 0.95;
     }
 
-    // 毎フレーム必ず頭の回転をゼロにリセットする
+    // 毎フレーム必ず姿勢をリセット（バグ防止）
     head.rotation.set(0, 0, 0);
+    armL.rotation.x = 0;
+    armR.rotation.x = 0;
+
+    // ベースとなる縦揺れ（待機モーション用）
+    let baseBouncerY = 0;
 
     if (!reduceMotion) {
-      // idle bob & breathing
-      bouncer.position.y = Math.sin(t * 2.2) * 0.05;
+      baseBouncerY = Math.sin(t * 2.2) * 0.05;
       body.scale.y = 0.92 + Math.sin(t * 2.2) * 0.012;
 
+      // 上書きではなく加算(+=)に変更
       head.rotation.z += Math.sin(t * 0.9) * 0.06;
       head.rotation.y += Math.sin(t * 0.6) * 0.08;
 
-      // ears sway
       earL.rotation.z = -0.4 - Math.sin(t * 2.2 + 0.4) * 0.07;
       earR.rotation.z =  0.4 + Math.sin(t * 2.2) * 0.07;
       earL.rotation.x = earR.rotation.x = Math.sin(t * 2.2 + 1) * 0.06;
 
-      // arms sway & feet tap
       armL.rotation.z = -0.3 + Math.sin(t * 2.2) * 0.12;
       armR.rotation.z =  0.3 - Math.sin(t * 2.2) * 0.12;
       footL.rotation.x = -Math.max(0, Math.sin(t * 3)) * 0.3;
       footR.rotation.x = -Math.max(0, -Math.sin(t * 3)) * 0.3;
 
-      // tail wag
       tailPivot.rotation.y = Math.sin(t * 6) * 0.5;
     }
+
+    // 基本の縦位置を適用
+    bouncer.position.y = baseBouncerY;
 
     // blinking
     nextBlink -= dt;
@@ -343,7 +346,7 @@
       eyeL.scale.y = eyeR.scale.y = 1;
     }
 
-    // wink (right eye closed + playful head tilt)
+    // wink
     if (winkT >= 0) {
       winkT += dt;
       if (winkT > 1.225) winkT = -1;
@@ -353,7 +356,7 @@
       }
     }
 
-    // jump (squash & stretch)
+    // jump
     if (jumpT >= 0) {
       jumpT += dt * 0.914;
       if (jumpT >= 1) {
@@ -361,8 +364,8 @@
         bouncer.scale.set(1, 1, 1);
       } else {
         const h = Math.sin(jumpT * Math.PI);
-        bouncer.position.y = h * 1.5;
-        armL.rotation.z = -0.3 - h * 2.0; // ばんざい
+        bouncer.position.y = h * 1.5; // ジャンプ時はY座標を上書き
+        armL.rotation.z = -0.3 - h * 2.0;
         armR.rotation.z =  0.3 + h * 2.0;
         const stretch = 1 + h * 0.12;
         bouncer.scale.set(1 / Math.sqrt(stretch), stretch, 1 / Math.sqrt(stretch));
@@ -376,7 +379,7 @@
       else chara.rotation.y += dt * 8 * Math.sin(spinT * Math.PI);
     }
 
-    // wave (right arm up, swinging side to side)
+    // wave
     if (waveT >= 0) {
       waveT += dt;
       if (waveT > 2.8) waveT = -1;
@@ -394,7 +397,7 @@
       }
     }
 
-    // ken-ken-pa: two one-foot hops, then a two-foot landing.
+    // ken-ken-pa
     if (kenkenpaT >= 0) {
       kenkenpaT += dt;
       const duration = 3.675;
@@ -411,7 +414,7 @@
         const local = step - phase;
         const hop = Math.sin(local * Math.PI);
 
-        bouncer.position.y = hop * (phase < 2 ? 0.65 : 0.45);
+        bouncer.position.y = hop * (phase < 2 ? 0.65 : 0.45); // 上書き
         head.rotation.z += Math.sin(kenkenpaT * 5.714) * 0.08;
 
         if (phase < 2) {
@@ -439,15 +442,38 @@
       }
     }
 
-    const isCommandPlaying =
-      jumpT >= 0 ||
-      spinT >= 0 ||
-      waveT >= 0 ||
-      bothWaveT >= 0 ||
-      kenkenpaT >= 0 ||
-      winkT >= 0;
-    setControlsHidden(isCommandPlaying);
+    // touch (近づいてきてタッチ)
+    if (touchT >= 0) {
+      touchT += dt;
+      const duration = 4.0; // 所要時間を 2.4秒 から 4.0秒 に延長（ゆっくりに）
+      if (touchT > duration) {
+        touchT = -1;
+        chara.position.z = 0;
+        chara.rotation.z = 0;
+      } else {
+        const p = touchT / duration;
+        const moveAmt = Math.sin(p * Math.PI);
 
+        chara.position.z = moveAmt * 5.5;
+
+        // 移動速度が遅くなった分、足踏み（揺れ）の周波数も落としてアニメーションの乖離を防ぐ
+        if (moveAmt < 0.95) {
+          bouncer.position.y += Math.abs(Math.sin(touchT * 12)) * 0.12; // 20から12へ減速
+          chara.rotation.z = Math.sin(touchT * 8) * 0.03;               // 12から8へ減速
+        } else {
+          chara.rotation.z = 0;
+        }
+
+        if (p > 0.3 && p < 0.7) {
+          const touchP = (p - 0.3) / 0.4;
+          const lift = Math.sin(touchP * Math.PI);
+          armR.rotation.x = -lift * 1.8;
+          head.rotation.x += lift * 0.2;
+        }
+      }
+    }
+
+    setControlsHidden(isBusy());
     renderer.render(scene, camera);
   }
   animate();

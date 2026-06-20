@@ -454,7 +454,7 @@
         const p = touchT / duration;
         const moveAmt = Math.sin(p * Math.PI);
 
-        chara.position.z = moveAmt * 5.5;
+        chara.position.z = moveAmt * 3.5;
 
         // 移動速度が遅くなった分、足踏み（揺れ）の周波数も落としてアニメーションの乖離を防ぐ
         if (moveAmt < 0.95) {

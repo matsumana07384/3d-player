@@ -77,21 +77,34 @@ header p {
 }
 
 .palette {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(132px, 160px));
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 520px);
 }
 .color-pick {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 700; letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 64px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   color: var(--cocoa);
   background: #FFFFFF;
-  border: 2px solid var(--cocoa);
+  border: 3px solid var(--cocoa);
   border-radius: 999px;
-  padding: 6px 10px 6px 16px;
-  box-shadow: 0 3px 0 var(--cocoa);
+  padding: 10px 14px 10px 16px;
+  line-height: 1;
+  box-shadow: 0 5px 0 var(--cocoa);
   cursor: pointer;
 }
 .color-pick input {
-  width: 36px; height: 30px;
+  width: 40px;
+  height: 34px;
   border: none; background: none; padding: 0;
   cursor: pointer;
 }
@@ -110,8 +123,19 @@ header p {
     border-width: 2px;
     box-shadow: 0 4px 0 var(--cocoa);
   }
-  .palette { gap: 8px; }
-  .color-pick { font-size: 13px; padding: 4px 8px 4px 12px; gap: 6px; }
+  .palette {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: min(100%, 360px);
+  }
+  .color-pick {
+    height: 48px;
+    font-size: 13px;
+    border-width: 2px;
+    box-shadow: 0 4px 0 var(--cocoa);
+    padding: 8px 8px 8px 12px;
+    gap: 6px;
+  }
   .color-pick input { width: 30px; height: 26px; }
 }
 

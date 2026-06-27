@@ -209,7 +209,7 @@
 
   // 複数アニメーションの重複実行を防ぐための判定
   function isBusy() {
-    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || winkT >= 0 || touchT >= 0;
+    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0;
   }
 
   stage.addEventListener('pointerdown', (e) => {
@@ -243,8 +243,19 @@
   let kenkenpaT = -1;
   let winkT = -1;
   let touchT = -1;  // タッチイベント用
+  let frontT = -1;
+  let frontFromX = 0;
+  let frontFromY = 0;
+  let frontFromZ = 0;
+  let frontToY = 0;
+  let frontPosFromZ = 0;
+  let headSpinT = -1;
   let blinkT = 0;
   let nextBlink = 2.2;
+
+  function normalizeAngle(angle) {
+    return Math.atan2(Math.sin(angle), Math.cos(angle));
+  }
 
   function jump() { if (!isBusy()) jumpT = 0; }
   function spin() { if (!isBusy()) { spinT = 0; jumpT = 0; } }
@@ -253,6 +264,17 @@
   function kenkenpa() { if (!isBusy()) kenkenpaT = 0; }
   function wink() { if (!isBusy()) winkT = 0; }
   function touchScreen() { if (!isBusy()) touchT = 0; }
+  function faceFront() {
+    if (isBusy()) return;
+    frontT = 0;
+    frontFromX = chara.rotation.x;
+    frontFromY = normalizeAngle(chara.rotation.y);
+    frontFromZ = chara.rotation.z;
+    frontToY = frontFromY + normalizeAngle(-frontFromY);
+    frontPosFromZ = chara.position.z;
+    velY = 0;
+  }
+  function headSpin() { if (!isBusy()) headSpinT = 0; }
 
   const controlsPanel = document.querySelector('.ui-bottom');
   document.getElementById('btnJump').addEventListener('click', jump);
@@ -262,6 +284,8 @@
   document.getElementById('btnKenkenpa').addEventListener('click', kenkenpa);
   document.getElementById('btnWink').addEventListener('click', wink);
   document.getElementById('btnTouch').addEventListener('click', touchScreen);
+  document.getElementById('btnFront').addEventListener('click', faceFront);
+  document.getElementById('btnHeadSpin').addEventListener('click', headSpin);
 
   function setControlsHidden(isHidden) {
     controlsPanel.classList.toggle('is-hidden', isHidden);
@@ -372,6 +396,24 @@
       }
     }
 
+    // front
+    if (frontT >= 0) {
+      frontT += dt;
+      const duration = 0.5;
+      if (frontT >= duration) {
+        frontT = -1;
+        chara.rotation.set(0, 0, 0);
+        chara.position.z = 0;
+      } else {
+        const p = frontT / duration;
+        const ease = 1 - Math.pow(1 - p, 3);
+        chara.rotation.x = THREE.MathUtils.lerp(frontFromX, 0, ease);
+        chara.rotation.y = THREE.MathUtils.lerp(frontFromY, frontToY, ease);
+        chara.rotation.z = THREE.MathUtils.lerp(frontFromZ, 0, ease);
+        chara.position.z = THREE.MathUtils.lerp(frontPosFromZ, 0, ease);
+      }
+    }
+
     // spin
     if (spinT >= 0) {
       spinT += dt * 0.8;
@@ -470,6 +512,21 @@
           armR.rotation.x = -lift * 1.8;
           head.rotation.x += lift * 0.2;
         }
+      }
+    }
+
+    // head spin
+    if (headSpinT >= 0) {
+      headSpinT += dt;
+      const duration = 2.4;
+      if (headSpinT >= duration) {
+        headSpinT = -1;
+      } else {
+        const p = headSpinT / duration;
+        const turn = p * Math.PI * 4;
+        head.rotation.y += turn;
+        head.rotation.z += Math.sin(p * Math.PI * 2) * 0.08;
+        head.rotation.x += Math.sin(p * Math.PI) * 0.12;
       }
     }
 

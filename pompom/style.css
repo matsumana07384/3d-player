@@ -76,6 +76,10 @@ header p {
   outline-offset: 2px;
 }
 
+#btnFront {
+  background: var(--coral);
+}
+
 .palette {
   display: grid;
   grid-template-columns: repeat(3, minmax(132px, 160px));

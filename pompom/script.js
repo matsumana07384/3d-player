@@ -250,6 +250,8 @@
   let frontToY = 0;
   let frontPosFromZ = 0;
   let headSpinT = -1;
+  let headTiltHoldX = 0;
+  let headTiltHoldZ = 0;
   let blinkT = 0;
   let nextBlink = 2.2;
 
@@ -332,6 +334,10 @@
     head.rotation.set(0, 0, 0);
     armL.rotation.x = 0;
     armR.rotation.x = 0;
+
+    // 「頭を回転」後の傾き保持
+    head.rotation.x += headTiltHoldX;
+    head.rotation.z += headTiltHoldZ;
 
     // ベースとなる縦揺れ（待機モーション用）
     let baseBouncerY = 0;
@@ -521,6 +527,8 @@
       const duration = 2.4;
       if (headSpinT >= duration) {
         headSpinT = -1;
+        headTiltHoldX = 0.16;
+        headTiltHoldZ = -0.22;
       } else {
         const p = headSpinT / duration;
         const turn = p * Math.PI * 4;

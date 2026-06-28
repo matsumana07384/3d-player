@@ -266,8 +266,32 @@
   function kenkenpa() { if (!isBusy()) kenkenpaT = 0; }
   function wink() { if (!isBusy()) winkT = 0; }
   function touchScreen() { if (!isBusy()) touchT = 0; }
+
+  function resetAnimationsForFront() {
+    jumpT = -1;
+    spinT = -1;
+    waveT = -1;
+    bothWaveT = -1;
+    kenkenpaT = -1;
+    winkT = -1;
+    touchT = -1;
+    headSpinT = -1;
+
+    bouncer.scale.set(1, 1, 1);
+    footL.position.copy(footLHome);
+    footR.position.copy(footRHome);
+    footL.rotation.set(0, 0, 0);
+    footR.rotation.set(0, 0, 0);
+    armL.rotation.set(0, 0, -0.3);
+    armR.rotation.set(0, 0, 0.3);
+    eyeR.scale.y = 1;
+
+    headTiltHoldX = 0;
+    headTiltHoldZ = 0;
+  }
+
   function faceFront() {
-    if (isBusy()) return;
+    resetAnimationsForFront();
     frontT = 0;
     frontFromX = chara.rotation.x;
     frontFromY = normalizeAngle(chara.rotation.y);

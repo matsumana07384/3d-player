@@ -203,13 +203,89 @@
   star.rotation.x = -0.55; // follow the body surface
   bouncer.add(star);
 
+  // --- umbrella -------------------------------------------------
+  // 傘は普段シーン直下（上空の待機位置）にあり、「もつ」でキャラクターの
+  // 左手（armL）の子として付け替えられる。「はなす」で再びシーン直下に
+  // 戻り、上空へ飛んでいくアニメーションをして待機位置へ帰る。
+  //
+  // 座標系：umbrella グループの原点＝持ち手（グリップ）。そこから軸(shaft)が
+  // 上に伸び、頭上を覆うくらい大きな傘の傘布(canopyGroup)がその先に付く。
+  // グリップは armL よりさらに外側・手前（z+方向）に置くことで、傘が
+  // キャラクターの体やヒヨコ毛に隠れて「後ろに入り込む」のを防いでいる。
+  const umbrellaShaftLen = 2.7;
+  const umbrellaCanopyRadius = 1.75;
+  const umbrellaCanopyHeight = 0.6;
+
+  const umbrellaClosedScale = new THREE.Vector3(0.1, 1.5, 0.1);
+  const umbrellaOpenScale = new THREE.Vector3(1, 1, 1);
+  const umbrellaStorePos = new THREE.Vector3(-2.6, 5.6, 0.9); // 画面外・上空の待機位置
+  const umbrellaHeldLocalPos = new THREE.Vector3(-0.4, -0.72, 0.42); // armL内でのグリップ位置
+  const umbrellaHeldLocalRot = new THREE.Euler(-0.05, 0, 0.1);
+
+  const umbrella = new THREE.Group();
+
+  // 持ち手（フック状のカーブ）
+  const umbrellaHandle = new THREE.Mesh(
+    new THREE.TorusGeometry(0.17, 0.034, 8, 20, Math.PI * 1.4), mat(COLORS.chocoD, 0.5));
+  umbrellaHandle.position.set(0, -0.05, 0);
+  umbrellaHandle.rotation.z = Math.PI * 0.15;
+  umbrellaHandle.castShadow = true;
+  umbrella.add(umbrellaHandle);
+
+  // 軸（シャフト）：グリップから頭上まで一直線に伸びる
+  const umbrellaShaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.035, umbrellaShaftLen, 10), mat(COLORS.cocoa, 0.5));
+  umbrellaShaft.position.y = umbrellaShaftLen / 2;
+  umbrellaShaft.castShadow = true;
+  umbrella.add(umbrellaShaft);
+
+  // 傘布（傘の開閉はこのグループごとスケールさせる）
+  const canopyGroup = new THREE.Group();
+  canopyGroup.position.y = umbrellaShaftLen + umbrellaCanopyHeight / 2;
+  canopyGroup.scale.copy(umbrellaClosedScale);
+  umbrella.add(canopyGroup);
+
+  // 8枚パネルのカクカクした傘布（画像のような、骨が入った布の見た目）
+  const canopyGeo = new THREE.ConeGeometry(umbrellaCanopyRadius, umbrellaCanopyHeight, 8, 1, true);
+  const canopyMat = new THREE.MeshStandardMaterial({
+    color: 0x4CAF50, roughness: 0.55, flatShading: true, side: THREE.DoubleSide, // デフォルトはグリーン
+  });
+  const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+  canopy.castShadow = true;
+  canopyGroup.add(canopy);
+
+  // 傘布の下側の陰影（裏地）— 画像のように内側が少し暗く見えるように
+  const canopyInnerMat = new THREE.MeshStandardMaterial({
+    color: 0x3d8b40, roughness: 0.7, flatShading: true, side: THREE.BackSide,
+  });
+  const canopyInner = new THREE.Mesh(canopyGeo, canopyInnerMat);
+  canopyInner.scale.set(0.985, 0.985, 0.985);
+  canopyGroup.add(canopyInner);
+
+  // 縁の縫い目（トリム）
+  const rimMat = mat(0x3d8b40, 0.6);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(umbrellaCanopyRadius, 0.045, 6, 8), rimMat);
+  rim.position.y = -umbrellaCanopyHeight / 2;
+  rim.rotation.x = Math.PI / 2;
+  canopyGroup.add(rim);
+
+  // 先端の石突き（開いた状態の高さに固定）
+  const umbrellaTip = new THREE.Mesh(
+    new THREE.ConeGeometry(0.045, 0.2, 8), mat(COLORS.cocoa, 0.5));
+  umbrellaTip.position.y = umbrellaShaftLen + umbrellaCanopyHeight + 0.1;
+  umbrella.add(umbrellaTip);
+
+  umbrella.position.copy(umbrellaStorePos);
+  scene.add(umbrella);
+
   // --- interaction: drag to rotate ----------------------------
   let dragging = false, moved = 0, px = 0, py = 0;
   let velY = 0; // inertia
 
   // 複数アニメーションの重複実行を防ぐための判定
   function isBusy() {
-    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0;
+    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 ||
+      umbrellaHoldT >= 0 || umbrellaOpenT >= 0 || umbrellaCloseT >= 0 || umbrellaReleaseT >= 0;
   }
 
   stage.addEventListener('pointerdown', (e) => {
@@ -255,8 +331,20 @@
   let blinkT = 0;
   let nextBlink = 2.2;
 
+  // 傘の状態
+  let umbrellaHoldT = -1;
+  let umbrellaOpenT = -1;
+  let umbrellaCloseT = -1;
+  let umbrellaReleaseT = -1;
+  let umbrellaHeld = false;
+  let umbrellaOpen = false;
+
   function normalizeAngle(angle) {
     return Math.atan2(Math.sin(angle), Math.cos(angle));
+  }
+
+  function easeOutCubic(x) {
+    return 1 - Math.pow(1 - x, 3);
   }
 
   function jump() { if (!isBusy()) jumpT = 0; }
@@ -266,6 +354,36 @@
   function kenkenpa() { if (!isBusy()) kenkenpaT = 0; }
   function wink() { if (!isBusy()) winkT = 0; }
   function touchScreen() { if (!isBusy()) touchT = 0; }
+
+  // 上空の待機位置から左手へ、傘が飛んでくる
+  function holdUmbrella() {
+    if (isBusy() || umbrellaHeld) return;
+    if (umbrella.parent !== scene) scene.add(umbrella);
+    umbrella.position.copy(umbrellaStorePos);
+    umbrella.rotation.set(0, 0, 0);
+    umbrellaHoldT = 0;
+  }
+  function openUmbrella() {
+    if (isBusy() || !umbrellaHeld || umbrellaOpen) return;
+    umbrellaOpenT = 0;
+  }
+  function closeUmbrella() {
+    if (isBusy() || !umbrellaHeld || !umbrellaOpen) return;
+    umbrellaCloseT = 0;
+  }
+  // 左手から離れ、上空へ飛んでいって待機位置に戻る
+  function releaseUmbrella() {
+    if (isBusy() || !umbrellaHeld) return;
+    const worldPos = new THREE.Vector3();
+    umbrella.getWorldPosition(worldPos);
+    const worldQuat = new THREE.Quaternion();
+    umbrella.getWorldQuaternion(worldQuat);
+    scene.add(umbrella);
+    umbrella.position.copy(worldPos);
+    umbrella.quaternion.copy(worldQuat);
+    umbrellaHeld = false;
+    umbrellaReleaseT = 0;
+  }
 
   function resetAnimationsForFront() {
     jumpT = -1;
@@ -288,6 +406,22 @@
 
     headTiltHoldX = 0;
     headTiltHoldZ = 0;
+
+    // 傘のアニメーション中に正面向くボタンが押された場合、破綻しない状態へスナップ
+    umbrellaHoldT = -1;
+    umbrellaOpenT = -1;
+    umbrellaCloseT = -1;
+    umbrellaReleaseT = -1;
+    if (umbrellaHeld) {
+      if (umbrella.parent !== armL) armL.add(umbrella);
+      umbrella.position.copy(umbrellaHeldLocalPos);
+      umbrella.rotation.copy(umbrellaHeldLocalRot);
+    } else {
+      if (umbrella.parent !== scene) scene.add(umbrella);
+      umbrella.position.copy(umbrellaStorePos);
+      umbrella.rotation.set(0, 0, 0);
+    }
+    canopyGroup.scale.copy(umbrellaOpen ? umbrellaOpenScale : umbrellaClosedScale);
   }
 
   function faceFront() {
@@ -312,6 +446,10 @@
   document.getElementById('btnTouch').addEventListener('click', touchScreen);
   document.getElementById('btnFront').addEventListener('click', faceFront);
   document.getElementById('btnHeadSpin').addEventListener('click', headSpin);
+  document.getElementById('btnUmbrellaHold').addEventListener('click', holdUmbrella);
+  document.getElementById('btnUmbrellaOpen').addEventListener('click', openUmbrella);
+  document.getElementById('btnUmbrellaClose').addEventListener('click', closeUmbrella);
+  document.getElementById('btnUmbrellaRelease').addEventListener('click', releaseUmbrella);
 
   function setControlsHidden(isHidden) {
     controlsPanel.classList.toggle('is-hidden', isHidden);
@@ -337,6 +475,12 @@
     mouthMat.color.copy(c);
     eyeL.material.color.copy(c);
     starMat.color.copy(c);
+  });
+  bindColor('umbrellaColor', (c) => {
+    canopy.material.color.copy(c);
+    const shade = c.clone().offsetHSL(0, 0.05, -0.14); // 裏地・トリムは少し暗めに
+    canopyInner.material.color.copy(shade);
+    rim.material.color.copy(shade);
   });
 
   // --- main loop ------------------------------------------------
@@ -559,6 +703,64 @@
         head.rotation.y += turn;
         head.rotation.z += Math.sin(p * Math.PI * 2) * 0.08;
         head.rotation.x += Math.sin(p * Math.PI) * 0.12;
+      }
+    }
+
+    // 傘：もつ（上空から左手へ飛んでくる）
+    if (umbrellaHoldT >= 0) {
+      umbrellaHoldT += dt / 0.7;
+      if (umbrellaHoldT >= 1) {
+        umbrellaHoldT = -1;
+        armL.add(umbrella);
+        umbrella.position.copy(umbrellaHeldLocalPos);
+        umbrella.rotation.copy(umbrellaHeldLocalRot);
+        umbrellaHeld = true;
+      } else {
+        const targetWorld = umbrellaHeldLocalPos.clone();
+        armL.localToWorld(targetWorld);
+        umbrella.position.lerpVectors(umbrellaStorePos, targetWorld, easeOutCubic(umbrellaHoldT));
+        umbrella.rotation.y += dt * 3; // ふわっと回転しながら降りてくる
+      }
+    }
+
+    // 傘：ひらく
+    if (umbrellaOpenT >= 0) {
+      umbrellaOpenT += dt / 0.45;
+      if (umbrellaOpenT >= 1) {
+        umbrellaOpenT = -1;
+        canopyGroup.scale.copy(umbrellaOpenScale);
+        umbrellaOpen = true;
+      } else {
+        canopyGroup.scale.lerpVectors(umbrellaClosedScale, umbrellaOpenScale, easeOutCubic(umbrellaOpenT));
+      }
+    }
+
+    // 傘：とじる
+    if (umbrellaCloseT >= 0) {
+      umbrellaCloseT += dt / 0.4;
+      if (umbrellaCloseT >= 1) {
+        umbrellaCloseT = -1;
+        canopyGroup.scale.copy(umbrellaClosedScale);
+        umbrellaOpen = false;
+      } else {
+        canopyGroup.scale.lerpVectors(umbrellaOpenScale, umbrellaClosedScale, easeOutCubic(umbrellaCloseT));
+      }
+    }
+
+    // 傘：はなす（上空へ飛んでいき、待機位置へ戻る）
+    if (umbrellaReleaseT >= 0) {
+      umbrellaReleaseT += dt / 1.1;
+      if (umbrellaReleaseT >= 1) {
+        umbrellaReleaseT = -1;
+        umbrella.position.copy(umbrellaStorePos);
+        umbrella.rotation.set(0, 0, 0);
+        canopyGroup.scale.copy(umbrellaClosedScale);
+        umbrellaOpen = false;
+      } else {
+        umbrella.position.y += dt * (2.2 + umbrellaReleaseT * 3.5);
+        umbrella.position.x += dt * 0.35;
+        umbrella.rotation.z += dt * 4.5;
+        umbrella.rotation.x += dt * 2.2;
       }
     }
 

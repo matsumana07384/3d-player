@@ -44,10 +44,10 @@ header p {
 }
 .controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(132px, 160px));
+  grid-template-columns: repeat(3, minmax(132px, 200px));
   justify-content: center;
   gap: 12px;
-  width: min(100%, 520px);
+  width: min(100%, 600px);
 }
 .controls button {
   font-family: inherit;
@@ -82,10 +82,10 @@ header p {
 
 .palette {
   display: grid;
-  grid-template-columns: repeat(3, minmax(132px, 160px));
+  grid-template-columns: repeat(3, minmax(132px, 200px));
   justify-content: center;
   gap: 12px;
-  width: min(100%, 520px);
+  width: min(100%, 600px);
 }
 .color-pick {
   display: flex;

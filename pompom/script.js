@@ -338,6 +338,7 @@
   let umbrellaReleaseT = -1;
   let umbrellaHeld = false;
   let umbrellaOpen = false;
+  let umbrellaPendingOpen = false; // ひらくボタン経由で持たせた場合、飛んできた直後に自動で開く
 
   function normalizeAngle(angle) {
     return Math.atan2(Math.sin(angle), Math.cos(angle));
@@ -356,19 +357,35 @@
   function touchScreen() { if (!isBusy()) touchT = 0; }
 
   // 上空の待機位置から左手へ、傘が飛んでくる
-  function holdUmbrella() {
-    if (isBusy() || umbrellaHeld) return;
+  function beginHoldFlight() {
     if (umbrella.parent !== scene) scene.add(umbrella);
     umbrella.position.copy(umbrellaStorePos);
     umbrella.rotation.set(0, 0, 0);
     umbrellaHoldT = 0;
   }
+  function holdUmbrella() {
+    if (isBusy() || umbrellaHeld) return;
+    beginHoldFlight();
+  }
   function openUmbrella() {
-    if (isBusy() || !umbrellaHeld || umbrellaOpen) return;
+    if (isBusy()) return;
+    if (!umbrellaHeld) {
+      // 傘を持っていなければ、まず持たせてから自動で開く
+      umbrellaPendingOpen = true;
+      beginHoldFlight();
+      return;
+    }
+    if (umbrellaOpen) return;
     umbrellaOpenT = 0;
   }
   function closeUmbrella() {
-    if (isBusy() || !umbrellaHeld || !umbrellaOpen) return;
+    if (isBusy()) return;
+    if (!umbrellaHeld) {
+      // 傘を持っていなければ、まず持たせる（持った直後はもともと閉じた状態）
+      beginHoldFlight();
+      return;
+    }
+    if (!umbrellaOpen) return;
     umbrellaCloseT = 0;
   }
   // 左手から離れ、上空へ飛んでいって待機位置に戻る
@@ -412,6 +429,7 @@
     umbrellaOpenT = -1;
     umbrellaCloseT = -1;
     umbrellaReleaseT = -1;
+    umbrellaPendingOpen = false;
     if (umbrellaHeld) {
       if (umbrella.parent !== armL) armL.add(umbrella);
       umbrella.position.copy(umbrellaHeldLocalPos);
@@ -715,6 +733,10 @@
         umbrella.position.copy(umbrellaHeldLocalPos);
         umbrella.rotation.copy(umbrellaHeldLocalRot);
         umbrellaHeld = true;
+        if (umbrellaPendingOpen) {
+          umbrellaPendingOpen = false;
+          umbrellaOpenT = 0;
+        }
       } else {
         const targetWorld = umbrellaHeldLocalPos.clone();
         armL.localToWorld(targetWorld);

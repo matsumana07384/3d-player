@@ -626,8 +626,14 @@
       if (bothWaveT > 3.15) bothWaveT = -1;
       else {
         const swing = Math.sin(bothWaveT * 10.286) * 0.32;
-        armL.rotation.z = -2.2 - swing;
-        armR.rotation.z =  2.2 + swing;
+        armR.rotation.z = 2.2 + swing;
+        if (umbrellaHeld) {
+          // 傘を持っている間は左腕を大きく振り上げない（刺さり防止）。
+          // 傘は持ち手に固定されているので、腕をあまり動かさず軽く揺らす程度に留める
+          armL.rotation.z = -0.3 - swing * 0.25;
+        } else {
+          armL.rotation.z = -2.2 - swing;
+        }
       }
     }
 
@@ -654,7 +660,7 @@
         if (phase < 2) {
           const sideLean = phase === 0 ? -1 : 1;
           chara.rotation.z = sideLean * hop * 0.08;
-          armL.rotation.z = -0.9 - hop * 0.5;
+          armL.rotation.z = umbrellaHeld ? (-0.3 - hop * 0.15) : (-0.9 - hop * 0.5);
           armR.rotation.z =  0.9 + hop * 0.5;
           footL.position.copy(footLHome);
           footR.position.copy(footRHome);
@@ -664,7 +670,7 @@
           footR.rotation.x = phase === 0 ? -0.75 * hop : -hop * 0.35;
         } else {
           chara.rotation.z = 0;
-          armL.rotation.z = -1.2 + hop * 0.25;
+          armL.rotation.z = umbrellaHeld ? (-0.3 - hop * 0.1) : (-1.2 + hop * 0.25);
           armR.rotation.z =  1.2 - hop * 0.25;
           footL.position.set(footLHome.x - 0.16 * hop, footLHome.y, footLHome.z);
           footR.position.set(footRHome.x + 0.16 * hop, footRHome.y, footRHome.z);

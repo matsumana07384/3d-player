@@ -42,7 +42,14 @@ header p {
   pointer-events: none;
   transform: translateY(28px);
 }
-.controls,
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(132px, 200px));
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 600px);
+}
+
 .palette {
   display: grid;
   grid-template-columns: repeat(3, minmax(132px, 200px));
@@ -78,7 +85,7 @@ header p {
   outline-offset: 2px;
 }
 
-[data-action="faceFront"] {
+#btnFront {
   background: var(--coral);
 }
 
@@ -110,8 +117,7 @@ header p {
 
 @media (max-width: 600px) {
   .ui-bottom { gap: 10px; bottom: 14px; }
-  .controls,
-  .palette {
+  .controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     width: min(100%, 360px);
@@ -122,6 +128,11 @@ header p {
     height: 48px;
     border-width: 2px;
     box-shadow: 0 4px 0 var(--cocoa);
+  }
+  .palette {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: min(100%, 360px);
   }
   .color-pick {
     height: 48px;

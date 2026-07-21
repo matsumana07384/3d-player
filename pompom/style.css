@@ -42,13 +42,15 @@ header p {
   pointer-events: none;
   transform: translateY(28px);
 }
-.controls {
+.controls,
+.palette {
   display: grid;
   grid-template-columns: repeat(3, minmax(132px, 200px));
   justify-content: center;
   gap: 12px;
   width: min(100%, 600px);
 }
+
 .controls button {
   font-family: inherit;
   font-size: 20px;
@@ -76,17 +78,10 @@ header p {
   outline-offset: 2px;
 }
 
-#btnFront {
+[data-action="faceFront"] {
   background: var(--coral);
 }
 
-.palette {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(132px, 200px));
-  justify-content: center;
-  gap: 12px;
-  width: min(100%, 600px);
-}
 .color-pick {
   display: flex;
   align-items: center;
@@ -115,7 +110,8 @@ header p {
 
 @media (max-width: 600px) {
   .ui-bottom { gap: 10px; bottom: 14px; }
-  .controls {
+  .controls,
+  .palette {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     width: min(100%, 360px);
@@ -126,11 +122,6 @@ header p {
     height: 48px;
     border-width: 2px;
     box-shadow: 0 4px 0 var(--cocoa);
-  }
-  .palette {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    width: min(100%, 360px);
   }
   .color-pick {
     height: 48px;

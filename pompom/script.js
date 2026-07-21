@@ -248,7 +248,7 @@
   // 8枚パネルのカクカクした傘布（画像のような、骨が入った布の見た目）
   const canopyGeo = new THREE.ConeGeometry(umbrellaCanopyRadius, umbrellaCanopyHeight, 8, 1, true);
   const canopyMat = new THREE.MeshStandardMaterial({
-    color: 0x4CAF50, roughness: 0.55, flatShading: true, side: THREE.DoubleSide, // デフォルトはグリーン
+    color: COLORS.mintD, roughness: 0.55, flatShading: true, side: THREE.DoubleSide, // デフォルトはグリーン
   });
   const canopy = new THREE.Mesh(canopyGeo, canopyMat);
   canopy.castShadow = true;
@@ -283,10 +283,11 @@
   let velY = 0; // inertia
 
   // 複数アニメーションの重複実行を防ぐための判定
-  function isBusy() {
-    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 ||
-      umbrellaHoldT >= 0 || umbrellaOpenT >= 0 || umbrellaCloseT >= 0 || umbrellaReleaseT >= 0;
-  }
+  const animationTimers = () => [
+    jumpT, spinT, waveT, bothWaveT, kenkenpaT, winkT, touchT, frontT, headSpinT,
+    umbrellaHoldT, umbrellaOpenT, umbrellaCloseT, umbrellaReleaseT,
+  ];
+  const isBusy = () => animationTimers().some((timer) => timer >= 0);
 
   stage.addEventListener('pointerdown', (e) => {
     dragging = true; moved = 0;
@@ -455,19 +456,13 @@
   function headSpin() { if (!isBusy()) headSpinT = 0; }
 
   const controlsPanel = document.querySelector('.ui-bottom');
-  document.getElementById('btnJump').addEventListener('click', jump);
-  document.getElementById('btnSpin').addEventListener('click', spin);
-  document.getElementById('btnWave').addEventListener('click', wave);
-  document.getElementById('btnBothWave').addEventListener('click', bothWave);
-  document.getElementById('btnKenkenpa').addEventListener('click', kenkenpa);
-  document.getElementById('btnWink').addEventListener('click', wink);
-  document.getElementById('btnTouch').addEventListener('click', touchScreen);
-  document.getElementById('btnFront').addEventListener('click', faceFront);
-  document.getElementById('btnHeadSpin').addEventListener('click', headSpin);
-  document.getElementById('btnUmbrellaHold').addEventListener('click', holdUmbrella);
-  document.getElementById('btnUmbrellaOpen').addEventListener('click', openUmbrella);
-  document.getElementById('btnUmbrellaClose').addEventListener('click', closeUmbrella);
-  document.getElementById('btnUmbrellaRelease').addEventListener('click', releaseUmbrella);
+  const actions = {
+    faceFront, jump, wave, bothWave, kenkenpa, wink, spin, headSpin, touchScreen,
+    holdUmbrella, openUmbrella, closeUmbrella, releaseUmbrella,
+  };
+  controlsPanel.querySelectorAll('[data-action]').forEach((button) => {
+    button.addEventListener('click', () => actions[button.dataset.action]());
+  });
 
   function setControlsHidden(isHidden) {
     controlsPanel.classList.toggle('is-hidden', isHidden);
@@ -475,9 +470,11 @@
   }
 
   // --- color pickers -------------------------------------------
-  const bindColor = (id, apply) =>
-    document.getElementById(id).addEventListener('input', (e) =>
-      apply(new THREE.Color(e.target.value)));
+  const bindColor = (id, apply) => {
+    document.getElementById(id).addEventListener('input', ({ target }) => {
+      apply(new THREE.Color(target.value));
+    });
+  };
 
   bindColor('bodyColor', (c) => {
     bodyColored.forEach((m) => m.material.color.copy(c));

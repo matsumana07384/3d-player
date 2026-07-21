@@ -284,7 +284,7 @@
 
   // 複数アニメーションの重複実行を防ぐための判定
   function isBusy() {
-    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 ||
+    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || takeAwayT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 ||
       umbrellaHoldT >= 0 || umbrellaOpenT >= 0 || umbrellaCloseT >= 0 || umbrellaReleaseT >= 0;
   }
 
@@ -317,6 +317,7 @@
   let waveT = -1;
   let bothWaveT = -1;
   let kenkenpaT = -1;
+  let takeAwayT = -1;
   let winkT = -1;
   let touchT = -1;  // タッチイベント用
   let frontT = -1;
@@ -353,6 +354,7 @@
   function wave() { if (!isBusy()) waveT = 0; }
   function bothWave() { if (!isBusy()) bothWaveT = 0; }
   function kenkenpa() { if (!isBusy()) kenkenpaT = 0; }
+  function takeAway() { if (!isBusy()) takeAwayT = 0; }
   function wink() { if (!isBusy()) winkT = 0; }
   function touchScreen() { if (!isBusy()) touchT = 0; }
 
@@ -408,6 +410,7 @@
     waveT = -1;
     bothWaveT = -1;
     kenkenpaT = -1;
+    takeAwayT = -1;
     winkT = -1;
     touchT = -1;
     headSpinT = -1;
@@ -456,6 +459,7 @@
 
   const controlsPanel = document.querySelector('.ui-bottom');
   document.getElementById('btnJump').addEventListener('click', jump);
+  document.getElementById('btnTakeAway').addEventListener('click', takeAway);
   document.getElementById('btnSpin').addEventListener('click', spin);
   document.getElementById('btnWave').addEventListener('click', wave);
   document.getElementById('btnBothWave').addEventListener('click', bothWave);
@@ -585,6 +589,22 @@
         armR.rotation.z =  0.3 + h * 2.0;
         const stretch = 1 + h * 0.12;
         bouncer.scale.set(1 / Math.sqrt(stretch), stretch, 1 / Math.sqrt(stretch));
+      }
+    }
+
+    // take away: 両手を上げて、キャラクターが上空へ飛んでいく
+    if (takeAwayT >= 0) {
+      takeAwayT += dt / 2.2;
+      if (takeAwayT >= 1) {
+        takeAwayT = -1;
+        chara.position.y = 0;
+        armL.rotation.z = -0.3;
+        armR.rotation.z = 0.3;
+      } else {
+        const p = easeOutCubic(takeAwayT);
+        chara.position.y = p * 5;
+        armL.rotation.z = -0.3 - p * 2.2;
+        armR.rotation.z = 0.3 + p * 2.2;
       }
     }
 

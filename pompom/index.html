@@ -21,35 +21,50 @@
     </svg>
   </button>
   <div class="ui-bottom">
-    <div class="palette">
-      <label class="color-pick" for="bodyColor">Body
-        <input type="color" id="bodyColor" value="#fffdf6" />
-      </label>
-      <label class="color-pick" for="hatColor">Hat
-        <input type="color" id="hatColor" value="#8b5e3c" />
-      </label>
-      <label class="color-pick" for="faceColor">Face
-        <input type="color" id="faceColor" value="#5a3e2b" />
-      </label>
-      <label class="color-pick" for="umbrellaColor">Umbrella
-        <input type="color" id="umbrellaColor" value="#4caf50" />
-      </label>
+    <div class="category-tabs" role="tablist" aria-label="あそびの種類">
+      <button class="category-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="category-play" data-category="play">あそぶ</button>
+      <button class="category-tab" type="button" role="tab" aria-selected="false" aria-controls="category-umbrella" data-category="umbrella">かさ</button>
+      <button class="category-tab" type="button" role="tab" aria-selected="false" aria-controls="category-color" data-category="color">いろ</button>
     </div>
-    <div class="controls">
-      <button id="btnFront">まえをむく</button>
-      <button id="btnJump">🦘Jump！</button>
-      <button id="btnTakeAway">つれていく</button>
-      <button id="btnWave">てをふる</button>
-      <button id="btnBothWave">りょうてをふる</button>
-      <button id="btnKenkenpa">ケンケンパ</button>
-      <button id="btnWink">ウィンク</button>
-      <button id="btnSpin">くるっとまわる</button>
-      <button id="btnHeadSpin">あたまをまわす</button>
-      <button id="btnTouch">タッチ</button>
-      <button id="btnUmbrellaHold">☂️をもつ</button>
-      <button id="btnUmbrellaOpen">OPEN☂️</button>
-      <button id="btnUmbrellaClose">CLOSE☂️</button>
-      <button id="btnUmbrellaRelease">☂️をはなす</button>
+    <div class="category-panels">
+      <section id="category-play" class="category-panel is-active" role="tabpanel">
+        <div class="controls">
+          <button id="btnFront">まえをむく</button>
+          <button id="btnJump">🦘Jump！</button>
+          <button id="btnTakeAway">つれていく</button>
+          <button id="btnWave">てをふる</button>
+          <button id="btnBothWave">りょうてをふる</button>
+          <button id="btnKenkenpa">ケンケンパ</button>
+          <button id="btnWink">ウィンク</button>
+          <button id="btnSpin">くるっとまわる</button>
+          <button id="btnHeadSpin">あたまをまわす</button>
+          <button id="btnTouch">タッチ</button>
+        </div>
+      </section>
+      <section id="category-umbrella" class="category-panel" role="tabpanel" hidden>
+        <div class="controls">
+          <button id="btnUmbrellaHold">☂️をもつ</button>
+          <button id="btnUmbrellaOpen">OPEN☂️</button>
+          <button id="btnUmbrellaClose">CLOSE☂️</button>
+          <button id="btnUmbrellaRelease">☂️をはなす</button>
+        </div>
+      </section>
+      <section id="category-color" class="category-panel" role="tabpanel" hidden>
+        <div class="palette">
+          <label class="color-pick" for="bodyColor">Body
+            <input type="color" id="bodyColor" value="#fffdf6" />
+          </label>
+          <label class="color-pick" for="hatColor">Hat
+            <input type="color" id="hatColor" value="#8b5e3c" />
+          </label>
+          <label class="color-pick" for="faceColor">Face
+            <input type="color" id="faceColor" value="#5a3e2b" />
+          </label>
+          <label class="color-pick" for="umbrellaColor">Umbrella
+            <input type="color" id="umbrellaColor" value="#4caf50" />
+          </label>
+        </div>
+      </section>
     </div>
   </div>
 

@@ -507,6 +507,8 @@
 
   const controlsPanel = document.querySelector('.ui-bottom');
   const screenshotButton = document.getElementById('btnScreenshot');
+  const categoryTabs = document.querySelectorAll('.category-tab');
+  const categoryPanels = document.querySelectorAll('.category-panel');
   document.getElementById('btnJump').addEventListener('click', jump);
   document.getElementById('btnTakeAway').addEventListener('click', takeAway);
   document.getElementById('btnSpin').addEventListener('click', spin);
@@ -521,6 +523,22 @@
   document.getElementById('btnUmbrellaOpen').addEventListener('click', openUmbrella);
   document.getElementById('btnUmbrellaClose').addEventListener('click', closeUmbrella);
   document.getElementById('btnUmbrellaRelease').addEventListener('click', releaseUmbrella);
+
+  categoryTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const category = tab.dataset.category;
+      categoryTabs.forEach((item) => {
+        const isActive = item === tab;
+        item.classList.toggle('is-active', isActive);
+        item.setAttribute('aria-selected', String(isActive));
+      });
+      categoryPanels.forEach((panel) => {
+        const isActive = panel.id === `category-${category}`;
+        panel.hidden = !isActive;
+        panel.classList.toggle('is-active', isActive);
+      });
+    });
+  });
 
   function timestampForFileName(date = new Date()) {
     const pad = (value) => String(value).padStart(2, '0');

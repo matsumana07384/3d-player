@@ -22,7 +22,7 @@
   camera.position.set(0, 2.6, 8.5);
   camera.lookAt(0, 1.6, 0);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.shadowMap.enabled = true;
@@ -458,6 +458,7 @@
   function headSpin() { if (!isBusy()) headSpinT = 0; }
 
   const controlsPanel = document.querySelector('.ui-bottom');
+  const screenshotButton = document.getElementById('btnScreenshot');
   document.getElementById('btnJump').addEventListener('click', jump);
   document.getElementById('btnTakeAway').addEventListener('click', takeAway);
   document.getElementById('btnSpin').addEventListener('click', spin);
@@ -472,6 +473,52 @@
   document.getElementById('btnUmbrellaOpen').addEventListener('click', openUmbrella);
   document.getElementById('btnUmbrellaClose').addEventListener('click', closeUmbrella);
   document.getElementById('btnUmbrellaRelease').addEventListener('click', releaseUmbrella);
+
+  function timestampForFileName(date = new Date()) {
+    const pad = (value) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+  }
+
+  function downloadScreenshot() {
+    screenshotButton.classList.add('is-hidden');
+    screenshotButton.disabled = true;
+
+    // Hide the button for a rendered frame before reading the canvas. The small
+    // delay also gives mobile browsers time to apply the visual state.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = renderer.domElement.width;
+      canvas.height = renderer.domElement.height;
+      const context = canvas.getContext('2d');
+      const gradient = context.createRadialGradient(
+        canvas.width * 0.5, canvas.height * 0.3, 0,
+        canvas.width * 0.5, canvas.height * 0.3, canvas.width * 0.75
+      );
+      gradient.addColorStop(0, '#FFFDF5');
+      gradient.addColorStop(0.45, '#FFF8E7');
+      gradient.addColorStop(1, '#FCEFD2');
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(renderer.domElement, 0, 0);
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `pompom-${timestampForFileName()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        screenshotButton.disabled = false;
+        screenshotButton.classList.remove('is-hidden');
+      }, 'image/png');
+    }));
+  }
+
+  screenshotButton.addEventListener('click', downloadScreenshot);
 
   function setControlsHidden(isHidden) {
     controlsPanel.classList.toggle('is-hidden', isHidden);

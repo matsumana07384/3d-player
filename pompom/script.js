@@ -1001,8 +1001,11 @@
       const duration = 2.4;
       if (headSpinT >= duration) {
         headSpinT = -1;
-        headTiltHoldX = 0.16;
-        headTiltHoldZ = -0.22;
+        // ヘッドスピン後に傾きを保持すると、次の待機姿勢でも首が曲がる。
+        // 終了時は通常のまっすぐな姿勢へ戻す。
+        headTiltHoldX = 0;
+        headTiltHoldZ = 0;
+        head.rotation.set(0, 0, 0);
       } else {
         const p = headSpinT / duration;
         const turn = p * Math.PI * 4;

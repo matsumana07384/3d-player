@@ -334,6 +334,10 @@
   // --- interaction: drag to rotate ----------------------------
   let dragging = false, moved = 0, px = 0, py = 0;
   let velY = 0; // inertia
+  let photoMode = false;
+  let selectedStamp = '💖';
+  let activeFrameIndex = 0;
+  let photoStamps = [];
 
   // 複数アニメーションの重複実行を防ぐための判定
   function isBusy() {
@@ -377,7 +381,10 @@
     dragging = false;
     stage.classList.remove('grabbing');
     // タップ判定で、他のアニメーションが再生中でなければタッチイベントを発火
-    if (moved < 6 && !isBusy()) playTouch(e.clientX, e.clientY);
+    if (moved < 6 && !isBusy()) {
+      if (photoMode) placePhotoStamp(e.clientX, e.clientY);
+      else playTouch(e.clientX, e.clientY);
+    }
   });
 
   // --- animation state machine ---------------------------------
@@ -534,6 +541,9 @@
 
   const controlsPanel = document.querySelector('.ui-bottom');
   const screenshotButton = document.getElementById('btnScreenshot');
+  const photoFrame = document.getElementById('photoFrame');
+  const photoStampsLayer = document.getElementById('photoStamps');
+  const photoTools = document.getElementById('photoTools');
   const categoryTabs = document.querySelectorAll('.category-tab');
   const categoryPanels = document.querySelectorAll('.category-panel');
   const actionHandlers = {
@@ -557,6 +567,55 @@
     button.addEventListener('click', () => actionHandlers[button.dataset.action]?.());
   });
 
+  const frameClasses = ['', 'frame-mint', 'frame-rainbow', 'frame-stars'];
+  function updatePhotoFrame() {
+    photoFrame.className = `photo-frame ${frameClasses[activeFrameIndex]}`;
+  }
+  function updatePhotoStamps() {
+    photoStampsLayer.replaceChildren();
+    photoStamps.forEach(({ emoji, x, y }) => {
+      const stamp = document.createElement('span');
+      stamp.className = 'photo-stamp';
+      stamp.textContent = emoji;
+      stamp.style.left = `${x}px`;
+      stamp.style.top = `${y}px`;
+      photoStampsLayer.appendChild(stamp);
+    });
+  }
+  function placePhotoStamp(x, y) {
+    photoStamps.push({ emoji: selectedStamp, x, y });
+    updatePhotoStamps();
+  }
+  function enterPhotoMode() {
+    photoMode = true;
+    activeFrameIndex = 0;
+    photoStamps = [];
+    updatePhotoFrame();
+    updatePhotoStamps();
+    document.body.classList.add('photo-mode');
+  }
+  function exitPhotoMode() {
+    photoMode = false;
+    document.body.classList.remove('photo-mode');
+    photoFrame.className = 'photo-frame';
+    photoStamps = [];
+    updatePhotoStamps();
+  }
+  document.getElementById('btnPhotoMode').addEventListener('click', enterPhotoMode);
+  document.getElementById('btnPhotoExit').addEventListener('click', exitPhotoMode);
+  document.getElementById('btnPhotoSave').addEventListener('click', downloadScreenshot);
+  document.getElementById('btnFrame').addEventListener('click', () => {
+    activeFrameIndex = (activeFrameIndex + 1) % frameClasses.length;
+    updatePhotoFrame();
+  });
+  document.querySelectorAll('.stamp-choice').forEach((button) => {
+    button.addEventListener('click', () => {
+      selectedStamp = button.dataset.stamp;
+      document.querySelectorAll('.stamp-choice').forEach((item) =>
+        item.classList.toggle('is-selected', item === button));
+    });
+  });
+
   categoryTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       const category = tab.dataset.category;
@@ -576,6 +635,43 @@
   function timestampForFileName(date = new Date()) {
     const pad = (value) => String(value).padStart(2, '0');
     return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+  }
+
+  function drawPhotoDecorations(context, width, height) {
+    const scaleX = width / innerWidth;
+    const scaleY = height / innerHeight;
+    photoStamps.forEach(({ emoji, x, y }) => {
+      context.font = `${Math.max(36, 58 * scaleX)}px sans-serif`;
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(emoji, x * scaleX, y * scaleY);
+    });
+
+    if (activeFrameIndex === 1) {
+      context.strokeStyle = 'rgba(158, 217, 181, 0.88)';
+      context.lineWidth = 18 * scaleX;
+      context.strokeRect(context.lineWidth / 2, context.lineWidth / 2,
+        width - context.lineWidth, height - context.lineWidth);
+    } else if (activeFrameIndex === 2) {
+      const gradient = context.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#F2917E');
+      gradient.addColorStop(0.35, '#F7DFA8');
+      gradient.addColorStop(0.7, '#9ED9B5');
+      gradient.addColorStop(1, '#8ED5E8');
+      context.strokeStyle = gradient;
+      context.lineWidth = 18 * scaleX;
+      context.strokeRect(context.lineWidth / 2, context.lineWidth / 2,
+        width - context.lineWidth, height - context.lineWidth);
+    } else if (activeFrameIndex === 3) {
+      context.strokeStyle = '#FFFDF5';
+      context.lineWidth = 18 * scaleX;
+      context.strokeRect(context.lineWidth / 2, context.lineWidth / 2,
+        width - context.lineWidth, height - context.lineWidth);
+      context.strokeStyle = '#F7DFA8';
+      context.lineWidth = 7 * scaleX;
+      context.strokeRect(context.lineWidth / 2 + 18 * scaleX, context.lineWidth / 2 + 18 * scaleY,
+        width - context.lineWidth - 36 * scaleX, height - context.lineWidth - 36 * scaleY);
+    }
   }
 
   function downloadScreenshot() {
@@ -599,6 +695,7 @@
       context.fillStyle = gradient;
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(renderer.domElement, 0, 0);
+      drawPhotoDecorations(context, canvas.width, canvas.height);
 
       canvas.toBlob((blob) => {
         if (blob) {

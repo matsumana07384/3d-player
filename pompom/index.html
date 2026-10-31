@@ -14,9 +14,24 @@
     <h1>pompom purin?</h1>
     <p>一緒に遊んだり、色を変えられるよ</p>
   </header>
-  <button id="btnScreenshot" class="screenshot-button" type="button" aria-label="スクリーンショットを保存" title="スクリーンショットを保存">
-    <span aria-hidden="true">📸</span><span>Photo</span>
-  </button>
+  <div class="top-actions">
+    <button id="btnPhotoMode" class="screenshot-button" type="button" aria-label="写真モードを開く" title="写真モードを開く">
+      <span aria-hidden="true">🖼️</span><span>Mode</span>
+    </button>
+    <button id="btnScreenshot" class="screenshot-button" type="button" aria-label="スクリーンショットを保存" title="スクリーンショットを保存">
+      <span aria-hidden="true">📸</span><span>Photo</span>
+    </button>
+  </div>
+  <div id="photoFrame" class="photo-frame" aria-hidden="true"></div>
+  <div id="photoStamps" class="photo-stamps" aria-hidden="true"></div>
+  <div id="photoTools" class="photo-tools" aria-label="写真モードの操作">
+    <button id="btnFrame" type="button">🌈 Frame</button>
+    <button class="stamp-choice is-selected" type="button" data-stamp="💖">💖</button>
+    <button class="stamp-choice" type="button" data-stamp="⭐">⭐</button>
+    <button class="stamp-choice" type="button" data-stamp="🌸">🌸</button>
+    <button id="btnPhotoSave" type="button">📸 Save</button>
+    <button id="btnPhotoExit" type="button">✕ Exit</button>
+  </div>
   <div class="ui-bottom">
     <div class="category-tabs" role="tablist" aria-label="あそびの種類">
       <button class="category-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="category-play" data-category="play">🎮 Play</button>

@@ -290,6 +290,7 @@
       head,
       nose,
       mouthMat,
+      starMat,
       eyeL,
       eyeR,
       earL,
@@ -303,6 +304,9 @@
       tailPivot,
       umbrella,
       canopyGroup,
+      canopy,
+      canopyInner,
+      rim,
       umbrellaClosedScale,
       umbrellaOpenScale,
       umbrellaStorePos,
@@ -322,7 +326,8 @@
   const {
     chara, bouncer, body, bodyColored, accentColored, head, nose, mouthMat,
     eyeL, eyeR, earL, earR, beretTop, beretStem, armL, armR, footL, footR,
-    tailPivot, umbrella, canopyGroup, umbrellaClosedScale, umbrellaOpenScale,
+    tailPivot, umbrella, canopyGroup, canopy, canopyInner, rim, starMat,
+    umbrellaClosedScale, umbrellaOpenScale,
     umbrellaStorePos, umbrellaHeldLocalPos, umbrellaHeldLocalRot,
   } = character;
 
@@ -424,8 +429,8 @@
   function touchScreen() { if (!isBusy()) touchT = 0; }
   function randomPlay() {
     if (isBusy()) return;
-    const actions = [jump, wave, bothWave, kenkenpa, wink, spin, headSpin, touchScreen];
-    actions[Math.floor(Math.random() * actions.length)]();
+    const actions = ['jump', 'wave', 'bothWave', 'kenkenpa', 'wink', 'spin', 'headSpin', 'touch'];
+    actionHandlers[actions[Math.floor(Math.random() * actions.length)]]();
   }
 
   // 上空の待機位置から左手へ、傘が飛んでくる
@@ -531,21 +536,26 @@
   const screenshotButton = document.getElementById('btnScreenshot');
   const categoryTabs = document.querySelectorAll('.category-tab');
   const categoryPanels = document.querySelectorAll('.category-panel');
-  document.getElementById('btnRandomPlay').addEventListener('click', randomPlay);
-  document.getElementById('btnJump').addEventListener('click', jump);
-  document.getElementById('btnTakeAway').addEventListener('click', takeAway);
-  document.getElementById('btnSpin').addEventListener('click', spin);
-  document.getElementById('btnWave').addEventListener('click', wave);
-  document.getElementById('btnBothWave').addEventListener('click', bothWave);
-  document.getElementById('btnKenkenpa').addEventListener('click', kenkenpa);
-  document.getElementById('btnWink').addEventListener('click', wink);
-  document.getElementById('btnTouch').addEventListener('click', () => playTouch());
-  document.getElementById('btnFront').addEventListener('click', faceFront);
-  document.getElementById('btnHeadSpin').addEventListener('click', headSpin);
-  document.getElementById('btnUmbrellaHold').addEventListener('click', holdUmbrella);
-  document.getElementById('btnUmbrellaOpen').addEventListener('click', openUmbrella);
-  document.getElementById('btnUmbrellaClose').addEventListener('click', closeUmbrella);
-  document.getElementById('btnUmbrellaRelease').addEventListener('click', releaseUmbrella);
+  const actionHandlers = {
+    randomPlay,
+    front: faceFront,
+    jump,
+    takeAway,
+    wave,
+    bothWave,
+    kenkenpa,
+    wink,
+    spin,
+    headSpin,
+    touch: playTouch,
+    umbrellaHold: holdUmbrella,
+    umbrellaOpen: openUmbrella,
+    umbrellaClose: closeUmbrella,
+    umbrellaRelease: releaseUmbrella,
+  };
+  document.querySelectorAll('[data-action]').forEach((button) => {
+    button.addEventListener('click', () => actionHandlers[button.dataset.action]?.());
+  });
 
   categoryTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -615,30 +625,31 @@
   }
 
   // --- color pickers -------------------------------------------
-  const bindColor = (id, apply) =>
-    document.getElementById(id).addEventListener('input', (e) =>
-      apply(new THREE.Color(e.target.value)));
-
-  bindColor('bodyColor', (c) => {
-    bodyColored.forEach((m) => m.material.color.copy(c));
-    const accent = c.clone().offsetHSL(0, 0.08, -0.07); // belly & feet
-    accentColored.forEach((m) => m.material.color.copy(accent));
-  });
-  bindColor('hatColor', (c) => {
-    beretTop.material.color.copy(c);
-    beretStem.material.color.copy(c.clone().offsetHSL(0, 0, -0.08));
-  });
-  bindColor('faceColor', (c) => {
-    nose.material.color.copy(c);
-    mouthMat.color.copy(c);
-    eyeL.material.color.copy(c);
-    starMat.color.copy(c);
-  });
-  bindColor('umbrellaColor', (c) => {
-    canopy.material.color.copy(c);
-    const shade = c.clone().offsetHSL(0, 0.05, -0.14); // 裏地・トリムは少し暗めに
-    canopyInner.material.color.copy(shade);
-    rim.material.color.copy(shade);
+  const colorBindings = {
+    bodyColor: (c) => {
+      bodyColored.forEach((m) => m.material.color.copy(c));
+      const accent = c.clone().offsetHSL(0, 0.08, -0.07); // belly & feet
+      accentColored.forEach((m) => m.material.color.copy(accent));
+    },
+    hatColor: (c) => {
+      beretTop.material.color.copy(c);
+      beretStem.material.color.copy(c.clone().offsetHSL(0, 0, -0.08));
+    },
+    faceColor: (c) => {
+      nose.material.color.copy(c);
+      mouthMat.color.copy(c);
+      eyeL.material.color.copy(c);
+      starMat.color.copy(c);
+    },
+    umbrellaColor: (c) => {
+      canopy.material.color.copy(c);
+      const shade = c.clone().offsetHSL(0, 0.05, -0.14); // inner shade & trim
+      canopyInner.material.color.copy(shade);
+      rim.material.color.copy(shade);
+    },
+  };
+  Object.entries(colorBindings).forEach(([id, apply]) => {
+    document.getElementById(id).addEventListener('input', (e) => apply(new THREE.Color(e.target.value)));
   });
 
   const colorPresets = {

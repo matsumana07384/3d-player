@@ -343,7 +343,7 @@
 
   // 複数アニメーションの重複実行を防ぐための判定
   function isBusy() {
-    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || hopscotchT >= 0 || takeAwayT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 ||
+    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || hopscotchT >= 0 || takeAwayT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 || powerSpinT >= 0 ||
       umbrellaHoldT >= 0 || umbrellaOpenT >= 0 || umbrellaCloseT >= 0 || umbrellaReleaseT >= 0;
   }
 
@@ -406,10 +406,11 @@
   let frontToY = 0;
   let frontPosFromZ = 0;
   let headSpinT = -1;
-  let headSpinAngle = 0;
-  let headSpinFromX = 0;
-  let headSpinFromY = 0;
-  let headSpinFromZ = 0;
+  let powerSpinT = -1;
+  let powerSpinAngle = 0;
+  let powerSpinFromX = 0;
+  let powerSpinFromY = 0;
+  let powerSpinFromZ = 0;
   let headTiltHoldX = 0;
   let headTiltHoldZ = 0;
   let blinkT = 0;
@@ -441,6 +442,8 @@
     hopscotchT = 0;
     chara.position.x = 0;
     chara.rotation.z = 0;
+    bouncer.position.y = 0;
+    setControlsHidden(true);
   }
   function takeAway() { if (!isBusy()) takeAwayT = 0; }
   function wink() { if (!isBusy()) winkT = 0; }
@@ -507,6 +510,7 @@
     winkT = -1;
     touchT = -1;
     headSpinT = -1;
+    powerSpinT = -1;
 
     bouncer.scale.set(1, 1, 1);
     footL.position.copy(footLHome);
@@ -551,10 +555,16 @@
   function headSpin() {
     if (isBusy()) return;
     headSpinT = 0;
-    headSpinAngle = 0;
-    headSpinFromX = chara.rotation.x;
-    headSpinFromY = chara.rotation.y;
-    headSpinFromZ = chara.rotation.z;
+    headTiltHoldX = 0;
+    headTiltHoldZ = 0;
+  }
+  function powerSpin() {
+    if (isBusy()) return;
+    powerSpinT = 0;
+    powerSpinAngle = 0;
+    powerSpinFromX = chara.rotation.x;
+    powerSpinFromY = chara.rotation.y;
+    powerSpinFromZ = chara.rotation.z;
     headTiltHoldX = 0;
     headTiltHoldZ = 0;
   }
@@ -577,6 +587,7 @@
     wink,
     spin,
     headSpin,
+    powerSpin,
     touch: playTouch,
     umbrellaHold: holdUmbrella,
     umbrellaOpen: openUmbrella,
@@ -957,9 +968,9 @@
         const local = step - phase;
         const hop = Math.sin(local * Math.PI);
 
-        bouncer.position.y = hop * (phase < 2 ? 0.65 : 0.45); // 上書き
+        bouncer.position.y = hop * (phase < 2 ? 0.9 : 0.6); // 上書き
         head.rotation.z += Math.sin(hopscotchT * 5.714) * 0.08;
-        chara.position.x = (phase === 0 ? -1 : phase === 1 ? 1 : 0) * hop * 0.28;
+        chara.position.x = (phase === 0 ? -1 : phase === 1 ? 1 : 0) * hop * 0.5;
 
         if (phase < 2) {
           const sideLean = phase === 0 ? -1 : 1;
@@ -1017,21 +1028,39 @@
       }
     }
 
-    // head spin power move: 頭頂部を床につけ、身体をまっすぐにして軸回転
+    // head spin: 既存の不思議な頭の回転
     if (headSpinT >= 0) {
       headSpinT += dt;
-      const poseDuration = 0.9;
-      const duration = 4.8;
+      const duration = 2.4;
       if (headSpinT >= duration) {
         headSpinT = -1;
-        headSpinAngle = 0;
+        headTiltHoldX = 0;
+        headTiltHoldZ = 0;
+        head.rotation.set(0, 0, 0);
+      } else {
+        const p = headSpinT / duration;
+        const turn = p * Math.PI * 4;
+        head.rotation.y += turn;
+        head.rotation.z += Math.sin(p * Math.PI * 2) * 0.08;
+        head.rotation.x += Math.sin(p * Math.PI) * 0.12;
+      }
+    }
+
+    // power spin: 頭頂部を床につけ、身体をまっすぐにして軸回転
+    if (powerSpinT >= 0) {
+      powerSpinT += dt;
+      const poseDuration = 0.9;
+      const duration = 4.8;
+      if (powerSpinT >= duration) {
+        powerSpinT = -1;
+        powerSpinAngle = 0;
         chara.position.set(0, 0, 0);
         chara.rotation.set(0, 0, 0);
         headTiltHoldX = 0;
         headTiltHoldZ = 0;
         head.rotation.set(0, 0, 0);
       } else {
-        const pose = Math.min(1, headSpinT / poseDuration);
+        const pose = Math.min(1, powerSpinT / poseDuration);
         const ease = easeOutCubic(pose);
         bouncer.position.set(0, 0, 0);
         bouncer.scale.set(1, 1, 1);
@@ -1040,14 +1069,14 @@
         chara.position.x = 0;
         chara.position.z = 0;
         chara.position.y = THREE.MathUtils.lerp(0, headSpinContactHeight, ease);
-        chara.rotation.x = THREE.MathUtils.lerp(headSpinFromX, 0, ease);
-        chara.rotation.z = THREE.MathUtils.lerp(headSpinFromZ, Math.PI, ease);
+        chara.rotation.x = THREE.MathUtils.lerp(powerSpinFromX, 0, ease);
+        chara.rotation.z = THREE.MathUtils.lerp(powerSpinFromZ, Math.PI, ease);
 
         if (pose >= 1) {
-          headSpinAngle += dt * 12;
-          chara.rotation.y = headSpinFromY + headSpinAngle;
+          powerSpinAngle += dt * 12;
+          chara.rotation.y = powerSpinFromY + powerSpinAngle;
         } else {
-          chara.rotation.y = headSpinFromY;
+          chara.rotation.y = powerSpinFromY;
         }
       }
     }

@@ -351,11 +351,28 @@
     velY = dx * 0.008;
     px = e.clientX; py = e.clientY;
   });
-  stage.addEventListener('pointerup', () => {
+  function showTapReaction(x, y) {
+    const reaction = document.createElement('span');
+    const reactions = ['💖', '✨', '⭐', '🌟'];
+    reaction.className = 'tap-reaction';
+    reaction.textContent = reactions[Math.floor(Math.random() * reactions.length)];
+    reaction.style.left = `${x}px`;
+    reaction.style.top = `${y}px`;
+    document.body.appendChild(reaction);
+    reaction.addEventListener('animationend', () => reaction.remove(), { once: true });
+  }
+
+  function playTouch(x = innerWidth / 2, y = innerHeight / 2) {
+    if (isBusy()) return;
+    touchScreen();
+    showTapReaction(x, y);
+  }
+
+  stage.addEventListener('pointerup', (e) => {
     dragging = false;
     stage.classList.remove('grabbing');
     // タップ判定で、他のアニメーションが再生中でなければタッチイベントを発火
-    if (moved < 6 && !isBusy()) touchScreen();
+    if (moved < 6 && !isBusy()) playTouch(e.clientX, e.clientY);
   });
 
   // --- animation state machine ---------------------------------
@@ -522,7 +539,7 @@
   document.getElementById('btnBothWave').addEventListener('click', bothWave);
   document.getElementById('btnKenkenpa').addEventListener('click', kenkenpa);
   document.getElementById('btnWink').addEventListener('click', wink);
-  document.getElementById('btnTouch').addEventListener('click', touchScreen);
+  document.getElementById('btnTouch').addEventListener('click', () => playTouch());
   document.getElementById('btnFront').addEventListener('click', faceFront);
   document.getElementById('btnHeadSpin').addEventListener('click', headSpin);
   document.getElementById('btnUmbrellaHold').addEventListener('click', holdUmbrella);

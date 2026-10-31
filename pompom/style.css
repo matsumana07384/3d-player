@@ -14,6 +14,20 @@ body {
 }
 #stage { position: fixed; inset: 0; cursor: grab; touch-action: none; }
 #stage.grabbing { cursor: grabbing; }
+.tap-reaction {
+  position: fixed;
+  z-index: 4;
+  pointer-events: none;
+  font-size: clamp(28px, 6vw, 46px);
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  animation: tap-reaction 0.85s ease-out forwards;
+}
+@keyframes tap-reaction {
+  0% { opacity: 0; transform: translate(-50%, -35%) scale(0.5) rotate(-12deg); }
+  18% { opacity: 1; transform: translate(-50%, -60%) scale(1.15) rotate(8deg); }
+  100% { opacity: 0; transform: translate(-50%, -180%) scale(0.9) rotate(18deg); }
+}
 
 header {
   position: fixed; top: 24px; left: 0; right: 0;
@@ -233,4 +247,5 @@ header p {
 
 @media (prefers-reduced-motion: reduce) {
   .controls button { transition: none; }
+  .tap-reaction { animation-duration: 0.01ms; }
 }

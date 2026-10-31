@@ -341,7 +341,7 @@
 
   // 複数アニメーションの重複実行を防ぐための判定
   function isBusy() {
-    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || kenkenpaT >= 0 || takeAwayT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 ||
+    return jumpT >= 0 || spinT >= 0 || waveT >= 0 || bothWaveT >= 0 || hopscotchT >= 0 || takeAwayT >= 0 || winkT >= 0 || touchT >= 0 || frontT >= 0 || headSpinT >= 0 ||
       umbrellaHoldT >= 0 || umbrellaOpenT >= 0 || umbrellaCloseT >= 0 || umbrellaReleaseT >= 0;
   }
 
@@ -393,7 +393,7 @@
   let spinT = -1;
   let waveT = -1;
   let bothWaveT = -1;
-  let kenkenpaT = -1;
+  let hopscotchT = -1;
   let takeAwayT = -1;
   let winkT = -1;
   let touchT = -1;  // タッチイベント用
@@ -430,13 +430,18 @@
   function spin() { if (!isBusy()) { spinT = 0; jumpT = 0; } }
   function wave() { if (!isBusy()) waveT = 0; }
   function bothWave() { if (!isBusy()) bothWaveT = 0; }
-  function kenkenpa() { if (!isBusy()) kenkenpaT = 0; }
+  function hopscotch() {
+    if (isBusy()) return;
+    hopscotchT = 0;
+    chara.position.x = 0;
+    chara.rotation.z = 0;
+  }
   function takeAway() { if (!isBusy()) takeAwayT = 0; }
   function wink() { if (!isBusy()) winkT = 0; }
   function touchScreen() { if (!isBusy()) touchT = 0; }
   function randomPlay() {
     if (isBusy()) return;
-    const actions = ['jump', 'wave', 'bothWave', 'kenkenpa', 'wink', 'spin', 'headSpin', 'touch'];
+    const actions = ['jump', 'wave', 'bothWave', 'hopscotch', 'wink', 'spin', 'headSpin', 'touch'];
     actionHandlers[actions[Math.floor(Math.random() * actions.length)]]();
   }
 
@@ -491,7 +496,7 @@
     spinT = -1;
     waveT = -1;
     bothWaveT = -1;
-    kenkenpaT = -1;
+    hopscotchT = -1;
     takeAwayT = -1;
     winkT = -1;
     touchT = -1;
@@ -553,7 +558,7 @@
     takeAway,
     wave,
     bothWave,
-    kenkenpa,
+    hopscotch,
     wink,
     spin,
     headSpin,
@@ -919,25 +924,27 @@
       }
     }
 
-    // ken-ken-pa
-    if (kenkenpaT >= 0) {
-      kenkenpaT += dt;
+    // hopscotch: 左右に踏み替えながら3回ジャンプする
+    if (hopscotchT >= 0) {
+      hopscotchT += dt;
       const duration = 3.675;
-      if (kenkenpaT > duration) {
-        kenkenpaT = -1;
+      if (hopscotchT > duration) {
+        hopscotchT = -1;
+        chara.position.x = 0;
         chara.rotation.z = 0;
         footL.position.copy(footLHome);
         footR.position.copy(footRHome);
         footL.rotation.set(0, 0, 0);
         footR.rotation.set(0, 0, 0);
       } else {
-        const step = kenkenpaT / (duration / 3);
+        const step = hopscotchT / (duration / 3);
         const phase = Math.min(2, Math.floor(step));
         const local = step - phase;
         const hop = Math.sin(local * Math.PI);
 
         bouncer.position.y = hop * (phase < 2 ? 0.65 : 0.45); // 上書き
-        head.rotation.z += Math.sin(kenkenpaT * 5.714) * 0.08;
+        head.rotation.z += Math.sin(hopscotchT * 5.714) * 0.08;
+        chara.position.x = (phase === 0 ? -1 : phase === 1 ? 1 : 0) * hop * 0.28;
 
         if (phase < 2) {
           const sideLean = phase === 0 ? -1 : 1;

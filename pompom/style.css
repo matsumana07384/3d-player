@@ -52,7 +52,9 @@ header p {
   z-index: 3;
   display: grid;
   place-items: center;
-  width: 52px;
+  grid-auto-flow: column;
+  gap: 4px;
+  min-width: 52px;
   height: 52px;
   padding: 10px;
   color: var(--cocoa);
@@ -71,6 +73,11 @@ header p {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
+}
+.screenshot-button > span:last-child {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
 }
 .screenshot-button:active {
   transform: translateY(3px);
@@ -237,12 +244,12 @@ header p {
   .screenshot-button {
     top: 14px;
     right: 14px;
-    width: 46px;
+    min-width: 46px;
     height: 46px;
     border-width: 2px;
     box-shadow: 0 3px 0 var(--cocoa);
   }
-  .screenshot-button svg { width: 24px; height: 24px; }
+  .screenshot-button > span:last-child { font-size: 10px; }
   .ui-bottom { gap: 10px; bottom: 14px; }
   .category-tabs { gap: 6px; width: min(100%, 360px); }
   .category-tab { height: 38px; padding: 6px 8px; font-size: 14px; }

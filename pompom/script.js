@@ -330,6 +330,8 @@
     umbrellaClosedScale, umbrellaOpenScale,
     umbrellaStorePos, umbrellaHeldLocalPos, umbrellaHeldLocalRot,
   } = character;
+  // 逆立ち時に頭頂部が床へ届く高さ（モデルの頭頂部基準）
+  const headSpinContactHeight = 3.6;
 
   // --- interaction: drag to rotate ----------------------------
   let dragging = false, moved = 0, px = 0, py = 0;
@@ -404,6 +406,10 @@
   let frontToY = 0;
   let frontPosFromZ = 0;
   let headSpinT = -1;
+  let headSpinAngle = 0;
+  let headSpinFromX = 0;
+  let headSpinFromY = 0;
+  let headSpinFromZ = 0;
   let headTiltHoldX = 0;
   let headTiltHoldZ = 0;
   let blinkT = 0;
@@ -542,7 +548,16 @@
     frontPosFromZ = chara.position.z;
     velY = 0;
   }
-  function headSpin() { if (!isBusy()) headSpinT = 0; }
+  function headSpin() {
+    if (isBusy()) return;
+    headSpinT = 0;
+    headSpinAngle = 0;
+    headSpinFromX = chara.rotation.x;
+    headSpinFromY = chara.rotation.y;
+    headSpinFromZ = chara.rotation.z;
+    headTiltHoldX = 0;
+    headTiltHoldZ = 0;
+  }
 
   const controlsPanel = document.querySelector('.ui-bottom');
   const screenshotButton = document.getElementById('btnScreenshot');
@@ -1002,23 +1017,38 @@
       }
     }
 
-    // head spin
+    // head spin power move: 頭頂部を床につけ、身体をまっすぐにして軸回転
     if (headSpinT >= 0) {
       headSpinT += dt;
-      const duration = 2.4;
+      const poseDuration = 0.9;
+      const duration = 4.8;
       if (headSpinT >= duration) {
         headSpinT = -1;
-        // ヘッドスピン後に傾きを保持すると、次の待機姿勢でも首が曲がる。
-        // 終了時は通常のまっすぐな姿勢へ戻す。
+        headSpinAngle = 0;
+        chara.position.set(0, 0, 0);
+        chara.rotation.set(0, 0, 0);
         headTiltHoldX = 0;
         headTiltHoldZ = 0;
         head.rotation.set(0, 0, 0);
       } else {
-        const p = headSpinT / duration;
-        const turn = p * Math.PI * 4;
-        head.rotation.y += turn;
-        head.rotation.z += Math.sin(p * Math.PI * 2) * 0.08;
-        head.rotation.x += Math.sin(p * Math.PI) * 0.12;
+        const pose = Math.min(1, headSpinT / poseDuration);
+        const ease = easeOutCubic(pose);
+        bouncer.position.set(0, 0, 0);
+        bouncer.scale.set(1, 1, 1);
+        body.scale.y = 0.92;
+        head.rotation.set(0, 0, 0);
+        chara.position.x = 0;
+        chara.position.z = 0;
+        chara.position.y = THREE.MathUtils.lerp(0, headSpinContactHeight, ease);
+        chara.rotation.x = THREE.MathUtils.lerp(headSpinFromX, 0, ease);
+        chara.rotation.z = THREE.MathUtils.lerp(headSpinFromZ, Math.PI, ease);
+
+        if (pose >= 1) {
+          headSpinAngle += dt * 12;
+          chara.rotation.y = headSpinFromY + headSpinAngle;
+        } else {
+          chara.rotation.y = headSpinFromY;
+        }
       }
     }
 

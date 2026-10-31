@@ -307,7 +307,7 @@ body.photo-mode .photo-tools { display: flex; }
 }
 
 @media (max-width: 600px) {
-  .top-actions { top: 14px; right: 14px; gap: 5px; }
+  .top-actions { top: 70px; right: 14px; gap: 5px; }
   .screenshot-button {
     top: 14px;
     right: 14px;

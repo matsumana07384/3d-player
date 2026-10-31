@@ -301,6 +301,8 @@
       armR,
       footL,
       footR,
+      footLHome,
+      footRHome,
       tailPivot,
       umbrella,
       canopyGroup,
@@ -326,6 +328,7 @@
   const {
     chara, bouncer, body, bodyColored, accentColored, head, nose, mouthMat,
     eyeL, eyeR, earL, earR, beretTop, beretStem, armL, armR, footL, footR,
+    footLHome, footRHome,
     tailPivot, umbrella, canopyGroup, canopy, canopyInner, rim, starMat,
     umbrellaClosedScale, umbrellaOpenScale,
     umbrellaStorePos, umbrellaHeldLocalPos, umbrellaHeldLocalRot,
@@ -438,11 +441,19 @@
   function wave() { if (!isBusy()) waveT = 0; }
   function bothWave() { if (!isBusy()) bothWaveT = 0; }
   function hopscotch() {
-    if (isBusy()) return;
+    if (hopscotchT >= 0) return;
+    // Hopscotchは単独で確実に始められるよう、残っている動作を止めて姿勢を整える。
+    resetAnimationsForFront();
     hopscotchT = 0;
-    chara.position.x = 0;
-    chara.rotation.z = 0;
+    chara.position.set(0, 0, 0);
+    chara.rotation.set(0, 0, 0);
     bouncer.position.y = 0;
+    bouncer.scale.set(1, 1, 1);
+    head.rotation.set(0, 0, 0);
+    footL.position.copy(footLHome);
+    footR.position.copy(footRHome);
+    footL.rotation.set(0, 0, 0);
+    footR.rotation.set(0, 0, 0);
     setControlsHidden(true);
   }
   function takeAway() { if (!isBusy()) takeAwayT = 0; }
@@ -509,6 +520,7 @@
     takeAwayT = -1;
     winkT = -1;
     touchT = -1;
+    frontT = -1;
     headSpinT = -1;
     powerSpinT = -1;
 
@@ -597,6 +609,7 @@
   document.querySelectorAll('[data-action]').forEach((button) => {
     button.addEventListener('click', () => actionHandlers[button.dataset.action]?.());
   });
+  document.getElementById('btnKenkenpa').addEventListener('click', hopscotch);
 
   const frameClasses = ['', 'frame-mint', 'frame-rainbow', 'frame-stars'];
   function updatePhotoFrame() {
@@ -1050,7 +1063,9 @@
     if (powerSpinT >= 0) {
       powerSpinT += dt;
       const poseDuration = 0.9;
-      const duration = 4.8;
+      const spinDuration = 4.8;
+      const standDuration = 0.9;
+      const duration = spinDuration + standDuration;
       if (powerSpinT >= duration) {
         powerSpinT = -1;
         powerSpinAngle = 0;
@@ -1059,7 +1074,7 @@
         headTiltHoldX = 0;
         headTiltHoldZ = 0;
         head.rotation.set(0, 0, 0);
-      } else {
+      } else if (powerSpinT < spinDuration) {
         const pose = Math.min(1, powerSpinT / poseDuration);
         const ease = easeOutCubic(pose);
         bouncer.position.set(0, 0, 0);
@@ -1078,6 +1093,17 @@
         } else {
           chara.rotation.y = powerSpinFromY;
         }
+      } else {
+        // 回転を止めたあと、頭を床から離してゆっくり立ち上がる。
+        const stand = easeOutCubic((powerSpinT - spinDuration) / standDuration);
+        bouncer.position.set(0, 0, 0);
+        bouncer.scale.set(1, 1, 1);
+        body.scale.y = 0.92;
+        head.rotation.set(0, 0, 0);
+        chara.position.set(0, THREE.MathUtils.lerp(headSpinContactHeight, 0, stand), 0);
+        chara.rotation.x = THREE.MathUtils.lerp(0, 0, stand);
+        chara.rotation.y = THREE.MathUtils.lerp(powerSpinFromY + powerSpinAngle, 0, stand);
+        chara.rotation.z = THREE.MathUtils.lerp(Math.PI, 0, stand);
       }
     }
 

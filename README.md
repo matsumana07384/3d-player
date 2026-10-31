@@ -1,37 +1,115 @@
-# 3d-player
-from ai
+# 3D Player
 
-## プレイヤー構成
+ブラウザ上で3Dキャラクターと遊べる、子ども向けのインタラクティブプレイヤーです。
+キャラクターを選択し、動かしたり、色を変えたり、着せ替えや写真撮影を楽しめます。
 
-共通処理とキャラクター定義を分離しています。
+## URL
+
+GitHub Pagesで公開しているサイト：
+
+<https://matsumana07384.github.io/3d-player/>
+
+通常のGitHub Pagesプロジェクトサイトでは、URLは次の形式になります。
+
+```text
+https://<ユーザー名>.github.io/<リポジトリ名>/
+```
+
+キャラクターはクエリパラメータで指定できます。
+
+```text
+https://<ユーザー名>.github.io/<リポジトリ名>/player/?character=pompom
+https://<ユーザー名>.github.io/<リポジトリ名>/player/?character=triceratops
+```
+
+## 主な機能
+
+- Pompom / Triceratops のキャラクター選択
+- ジャンプ、手振り、回転、ウィンク、Hopscotch、Power Spin
+- 四足歩行キャラクター向けの専用アニメーションプロファイル
+- ドラッグによる3Dモデルの回転
+- 色変更と色プリセット
+- リボン、メガネ、マント、ネコ耳の着せ替え
+- 昼、夜、海、宇宙、お菓子の国の背景切り替え
+- 写真モード、フレーム、スタンプ
+- PNGスクリーンショットのローカル保存
+- タップ、ジャンプ、ウィンクなどの効果音
+- 効果音のミュート切り替え
+- PC・スマートフォン対応
+
+## 画面の使い方
+
+1. トップページでキャラクターを選択します
+2. `Play` からキャラクターを動かします
+3. `Colors` で色を変更します
+4. `Dress Up` でアクセサリーを選びます
+5. `World` で背景を変更します
+6. `🖼️ Mode` で写真モードを開き、フレームやスタンプを追加します
+7. `📸 Photo` または写真モードの `Save` で画像を保存します
+
+文字をまだ読めない子どもでも遊べるよう、絵文字・短い英語・アニメーション・音によるフィードバックを重視しています。
+
+## 技術構成
+
+- HTML / CSS / JavaScript
+- [Three.js r128](https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js)
+- Web Audio API（短い効果音の生成）
+- SVG favicon
+- 外部サーバーやバックエンドを使用しない静的サイト
+
+## ディレクトリ構成
 
 ```text
 /
-├─ index.html
+├─ index.html                  # キャラクター選択画面
 ├─ player/
-│  ├─ index.html
-│  ├─ player.js
-│  └─ player.css
-└─ characters/
-   └─ pompom.js
+│  ├─ index.html               # 共通プレイヤー画面
+│  ├─ player.js                # 共通UI・描画・操作・写真モード
+│  └─ player.css               # 共通スタイル
+├─ characters/
+│  ├─ pompom.js                # Pompomのモデル定義
+│  └─ triceratops.js           # Triceratopsのモデル定義
+├─ pompom/
+│  ├─ index.html               # 旧URLからの互換リダイレクト
+│  └─ favicon.svg              # 🍮🤖 favicon
+├─ FEATURE_REQUIREMENTS.md     # 今後の子ども向け機能の要件定義
+└─ package.json
 ```
 
-プレイヤーは `player/?character=pompom` のクエリでキャラクターを選択します。
-新しいキャラクターは `characters/` にモデルファクトリを追加し、`player/player.js` の
+### キャラクター追加
+
+キャラクター生成ファクトリに `animationProfile` を持たせ、`player/player.js` の
 `characterFactories` と `animationProfiles` に登録します。
 
-## キャラクターの差し替え
+キャラクターごとに対応するアニメーションだけを有効化できるため、二足歩行と四足歩行のように体の構造が異なるキャラクターにも対応できます。
 
-`pompom/index.html` の `body[data-character]` で使用するキャラクター名を選択します。
-キャラクター生成は `pompom/script.js` の `characterFactories` に登録するファクトリへ分離しており、
-プレイヤー本体は `chara`、`bouncer`、腕・足・頭などの共通インターフェースだけを利用します。
+## ローカルで起動
 
-新しいキャラクターは `createPompomCharacter()` と同じ形式で生成し、
-`characterFactories` に名前を追加すれば、操作・アニメーション・スクリーンショット機能を再利用できます。
+Node.jsを用意したうえで、リポジトリのルートで実行します。
 
-### アニメーションプロファイル
+```bash
+npm install
+npm run server
+```
 
-キャラクター生成結果の `animationProfile` が、`animationProfiles` の対応表を選択します。
-二足歩行のポムポムは `pompom` プロファイルを使います。四足歩行キャラクターを追加する場合は、
-四足用の `walk`、`run`、`sit`、`tailWag` などを持つ別プロファイルを登録し、
-対応していない既存ボタンは自動的に無効化できます。
+ブラウザで <http://localhost:3000/> を開いてください。
+
+## GitHub Pagesで公開
+
+1. GitHubリポジトリの Settings を開く
+2. Pages を開く
+3. 公開元に `main` ブランチのルートディレクトリを指定する
+4. 保存後、表示されたURLへアクセスする
+
+本プロジェクトは静的ファイルだけで構成されているため、サーバーサイドの設定は必要ありません。
+
+## AIの利用
+
+このリポジトリの開発では、実装・リファクタリング・UI設計・要件整理にAI（OpenAI Codex）を利用しています。
+
+AIはコード作成の補助として使用し、動作確認、構成判断、子ども向けの操作性調整はリポジトリ上で確認しながら進めています。
+
+## ライセンス
+
+現時点では、このリポジトリに個別のライセンスは設定していません。
+利用・再配布が必要な場合は、別途ライセンスを追加してください。

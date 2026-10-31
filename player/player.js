@@ -1,5 +1,5 @@
 import { createPompomCharacter } from '../characters/pompom.js';
-import { createTrixieCharacter } from '../characters/trixie.js';
+import { createTriceratopsCharacter } from '../characters/triceratops.js';
 
 (() => {
   const THREE = window.THREE;
@@ -76,13 +76,13 @@ import { createTrixieCharacter } from '../characters/trixie.js';
   // Character models live under ../characters; the player only consumes their contract.
   const characterFactories = {
     pompom: createPompomCharacter,
-    trixie: createTrixieCharacter,
+    triceratops: createTriceratopsCharacter,
   };
   const queryCharacter = new URLSearchParams(location.search).get('character');
   const characterName = queryCharacter || document.body.dataset.character || 'pompom';
   const createCharacter = characterFactories[characterName] || characterFactories.pompom;
   const character = createCharacter({ THREE, scene, COLORS, mat, ball });
-  const characterTitles = { pompom: 'pompom purin?', trixie: 'Trixie' };
+  const characterTitles = { pompom: 'pompom purin?', triceratops: 'Triceratops' };
   document.querySelector('header h1').textContent = characterTitles[characterName] || '3D Player';
   const {
     chara, bouncer, body, bodyColored, accentColored, head, nose, mouthMat,
@@ -415,7 +415,7 @@ import { createTrixieCharacter } from '../characters/trixie.js';
       umbrellaClose: closeUmbrella,
       umbrellaRelease: releaseUmbrella,
     },
-    trixie: {
+    triceratops: {
       randomPlay,
       front: faceFront,
       jump,

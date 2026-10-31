@@ -1,5 +1,5 @@
-// Four-legged character model inspired by the provided Trixie reference.
-export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
+// Four-legged triceratops character model.
+export function createTriceratopsCharacter({ THREE, scene, COLORS, mat, ball }) {
   const chara = new THREE.Group();
   const bouncer = new THREE.Group();
   chara.add(bouncer);
@@ -7,17 +7,17 @@ export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
 
   const bodyColored = [];
   const accentColored = [];
-  const trixieBlue = 0x4F9CAF;
-  const trixieBlueDark = 0x39758A;
+  const triceratopsBlue = 0x4F9CAF;
+  const triceratopsBlueDark = 0x39758A;
   const hornColor = 0xEAD4A0;
   const faceColor = 0x27394A;
 
-  const body = ball(1.18, trixieBlue, 1.18, 0.82, 0.92);
+  const body = ball(1.18, triceratopsBlue, 1.18, 0.82, 0.92);
   body.position.y = 1.35;
   bouncer.add(body);
   bodyColored.push(body);
 
-  const belly = ball(0.76, trixieBlueDark, 1, 0.9, 0.65);
+  const belly = ball(0.76, triceratopsBlueDark, 1, 0.9, 0.65);
   belly.position.set(0, 1.25, 0.55);
   bouncer.add(belly);
   accentColored.push(belly);
@@ -26,12 +26,12 @@ export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
   head.position.set(0, 2.25, 0.2);
   bouncer.add(head);
 
-  const frill = ball(0.95, trixieBlueDark, 1.12, 1.08, 0.3);
+  const frill = ball(0.95, triceratopsBlueDark, 1.12, 1.08, 0.3);
   frill.position.z = -0.28;
   head.add(frill);
   bodyColored.push(frill);
 
-  const skull = ball(0.78, trixieBlue, 1.05, 0.95, 1.05);
+  const skull = ball(0.78, triceratopsBlue, 1.05, 0.95, 1.05);
   head.add(skull);
   bodyColored.push(skull);
 
@@ -52,7 +52,7 @@ export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
 
   const nose = new THREE.Mesh(
     new THREE.SphereGeometry(0.12, 16, 12),
-    mat(trixieBlueDark, 0.7)
+    mat(triceratopsBlueDark, 0.7)
   );
   nose.position.set(0, -0.12, 0.93);
   head.add(nose);
@@ -75,7 +75,7 @@ export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
   function makeLeg(x, z) {
     const leg = new THREE.Group();
     leg.position.set(x, 0.72, z);
-    const shin = ball(0.34, trixieBlue, 0.72, 1.3, 0.72);
+    const shin = ball(0.34, triceratopsBlue, 0.72, 1.3, 0.72);
     shin.position.y = -0.28;
     const foot = ball(0.28, hornColor, 1, 0.55, 1.25);
     foot.position.set(0, -0.58, 0.1);
@@ -96,7 +96,7 @@ export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
   tailPivot.position.set(0, 1.45, -1.0);
   const tail = new THREE.Mesh(
     new THREE.ConeGeometry(0.22, 1.15, 8),
-    mat(trixieBlueDark, 0.8)
+    mat(triceratopsBlueDark, 0.8)
   );
   tail.rotation.x = Math.PI / 2;
   tail.position.z = -0.45;
@@ -106,7 +106,7 @@ export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
 
   // Compatibility parts used by shared color and reset logic.
   const beret = new THREE.Group();
-  const beretTop = new THREE.Mesh(new THREE.SphereGeometry(0.01, 4, 4), mat(trixieBlue));
+  const beretTop = new THREE.Mesh(new THREE.SphereGeometry(0.01, 4, 4), mat(triceratopsBlue));
   const beretStem = beretTop.clone();
   beret.visible = false;
   const earL = new THREE.Group();
@@ -134,7 +134,7 @@ export function createTrixieCharacter({ THREE, scene, COLORS, mat, ball }) {
     beretTop,
     beretStem,
     accessories: { beret },
-    animationProfile: 'trixie',
+    animationProfile: 'triceratops',
     armL: frontLeft,
     armR: frontRight,
     footL: backLeft,

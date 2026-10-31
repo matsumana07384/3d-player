@@ -10,8 +10,8 @@ export function createPompomCharacter({ THREE, scene, COLORS, mat, ball }) {
   const accentColored = []; // belly / feet (slightly darker accent)
 
   // body
-  const body = ball(1.05, COLORS.milk, 1, 0.92, 0.92);
-  body.position.y = 1.0;
+  const body = ball(1.12, COLORS.milk, 1.04, 1.08, 0.98);
+  body.position.y = 1.05;
   bouncer.add(body);
   bodyColored.push(body);
 
@@ -26,7 +26,7 @@ export function createPompomCharacter({ THREE, scene, COLORS, mat, ball }) {
   head.position.set(0, 2.35, 0);
   bouncer.add(head);
 
-  const skull = ball(0.95, COLORS.milk, 1.08, 1, 1);
+  const skull = ball(0.98, COLORS.milk, 1.12, 1.02, 1.02);
   head.add(skull);
   bodyColored.push(skull);
 
@@ -35,7 +35,7 @@ export function createPompomCharacter({ THREE, scene, COLORS, mat, ball }) {
     new THREE.ConeGeometry(0.065, 0.085, 24), mat(COLORS.cocoa, 0.6));
   nose.rotation.x = Math.PI; // apex down → ▼
   nose.scale.z = 0.5;
-  nose.position.set(0, 0.0, 0.94);
+  nose.position.set(0, 0.0, 1.08);
   nose.castShadow = true;
   head.add(nose);
 
@@ -46,23 +46,23 @@ export function createPompomCharacter({ THREE, scene, COLORS, mat, ball }) {
   const mouthR = new THREE.Mesh(mouthGeo, mouthMat);
   mouthL.rotation.z = Math.PI; // flip arc to open upward → ∪∪ = ω
   mouthR.rotation.z = Math.PI;
-  mouthL.position.set(-0.073, -0.03, 0.945);
-  mouthR.position.set( 0.073, -0.03, 0.945);
+  mouthL.position.set(-0.073, -0.03, 1.08);
+  mouthR.position.set( 0.073, -0.03, 1.08);
   head.add(mouthL, mouthR);
 
   // eyes (blink by scaling y)
   const eyeL = ball(0.05, 0x3A2A1E);
   const eyeR = eyeL.clone();
-  eyeL.position.set(-0.38, 0.12, 0.86);
-  eyeR.position.set( 0.38, 0.12, 0.86);
+  eyeL.position.set(-0.38, 0.12, 1.04);
+  eyeR.position.set( 0.38, 0.12, 1.04);
   head.add(eyeL, eyeR);
 
   // lop ears (pivot at top so they swing)
   function makeEar(side) {
     const pivot = new THREE.Group();
     pivot.position.set(0.92 * side, 0.75, 0.05);
-    const ear = ball(0.34, COLORS.milk, 0.55, 1.4, 0.42);
-    ear.position.y = -0.5;
+    const ear = ball(0.42, COLORS.milk, 0.62, 1.55, 0.5);
+    ear.position.y = -0.55;
     pivot.add(ear);
     bodyColored.push(ear);
     pivot.rotation.z = 0.4 * side; // drape outward
@@ -75,9 +75,9 @@ export function createPompomCharacter({ THREE, scene, COLORS, mat, ball }) {
   // beret, worn straight
   const beret = new THREE.Group();
   beret.position.set(0, 0.86, 0);
-  const beretTop = ball(0.55, COLORS.choco, 1.05, 0.45, 1.05);
+  const beretTop = ball(0.55, 0x9C3035, 1.08, 0.45, 1.08);
   const beretStem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.035, 0.035, 0.16, 12), mat(COLORS.chocoD));
+    new THREE.CylinderGeometry(0.035, 0.035, 0.16, 12), mat(0x70242B));
   beretStem.position.y = 0.26;
   beret.add(beretTop, beretStem);
   head.add(beret);
@@ -134,7 +134,7 @@ export function createPompomCharacter({ THREE, scene, COLORS, mat, ball }) {
   function makeArm(side) {
     const pivot = new THREE.Group();
     pivot.position.set(0.8 * side, 1.55, 0.2);
-    const arm = ball(0.3, COLORS.milk, 0.85, 1.15, 0.85);
+    const arm = ball(0.29, COLORS.milk, 0.9, 1.1, 0.9);
     arm.position.y = -0.38;
     pivot.add(arm);
     bodyColored.push(arm);
@@ -149,7 +149,7 @@ export function createPompomCharacter({ THREE, scene, COLORS, mat, ball }) {
   function makeFoot(side) {
     const pivot = new THREE.Group();
     pivot.position.set(0.45 * side, 0.42, 0.12);
-    const foot = ball(0.34, COLORS.latte, 1, 0.7, 1.15);
+    const foot = ball(0.28, COLORS.latte, 1, 0.7, 1.12);
     foot.position.set(0, -0.18, 0.18);
     pivot.add(foot);
     accentColored.push(foot);

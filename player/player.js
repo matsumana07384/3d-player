@@ -5,8 +5,8 @@ import { createPompomCharacter } from '../characters/pompom.js';
   if (!THREE) throw new Error('Three.js failed to load before player.js');
   const COLORS = {
     custard: 0xF7DFA8,
-    milk:    0xFFFDF6,
-    latte:   0xF1E4CF,
+    milk:    0xFFF3AD,
+    latte:   0xE5D18A,
     caramel: 0xE3B878,
     creamW:  0xFFF6E8,
     mint:    0x9ED9B5,
@@ -656,7 +656,7 @@ import { createPompomCharacter } from '../characters/pompom.js';
   });
 
   const colorPresets = {
-    pudding: { bodyColor: '#fffdf6', hatColor: '#8b5e3c', faceColor: '#5a3e2b', umbrellaColor: '#4caf50' },
+    pudding: { bodyColor: '#fff3ad', hatColor: '#9c3035', faceColor: '#5a3e2b', umbrellaColor: '#4caf50' },
     strawberry: { bodyColor: '#fff0e8', hatColor: '#f2917e', faceColor: '#8a4a42', umbrellaColor: '#f7b5c8' },
     sky: { bodyColor: '#effbff', hatColor: '#6c9fd8', faceColor: '#3b587a', umbrellaColor: '#8ed5e8' },
     night: { bodyColor: '#d9d8f5', hatColor: '#3f416e', faceColor: '#252744', umbrellaColor: '#7bbf98' },

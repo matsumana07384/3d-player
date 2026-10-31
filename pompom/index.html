@@ -38,6 +38,8 @@
       <button class="category-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="category-play" data-category="play">🎮 Play</button>
       <button class="category-tab" type="button" role="tab" aria-selected="false" aria-controls="category-umbrella" data-category="umbrella">☂️ Umbrella</button>
       <button class="category-tab" type="button" role="tab" aria-selected="false" aria-controls="category-color" data-category="color">🎨 Colors</button>
+      <button class="category-tab" type="button" role="tab" aria-selected="false" aria-controls="category-dress" data-category="dress">👗 Dress Up</button>
+      <button class="category-tab" type="button" role="tab" aria-selected="false" aria-controls="category-world" data-category="world">🌈 World</button>
     </div>
     <div class="category-panels">
       <section id="category-play" class="category-panel is-active" role="tabpanel">
@@ -84,6 +86,24 @@
           <label class="color-pick" for="umbrellaColor">☂️ Umbrella
             <input type="color" id="umbrellaColor" value="#4caf50" />
           </label>
+        </div>
+      </section>
+      <section id="category-dress" class="category-panel" role="tabpanel" hidden>
+        <div class="dress-up-grid" aria-label="着せ替え">
+          <button class="accessory-button is-selected" type="button" data-accessory="beret">🎩 Beret</button>
+          <button class="accessory-button" type="button" data-accessory="ribbon">🎀 Ribbon</button>
+          <button class="accessory-button" type="button" data-accessory="glasses">👓 Glasses</button>
+          <button class="accessory-button" type="button" data-accessory="cape">🦸 Cape</button>
+          <button class="accessory-button" type="button" data-accessory="catEars">🐱 Cat Ears</button>
+        </div>
+      </section>
+      <section id="category-world" class="category-panel" role="tabpanel" hidden>
+        <div class="world-grid" aria-label="背景テーマ">
+          <button class="world-button is-selected" type="button" data-background="day">☀️ Day</button>
+          <button class="world-button" type="button" data-background="night">🌙 Night</button>
+          <button class="world-button" type="button" data-background="sea">🌊 Sea</button>
+          <button class="world-button" type="button" data-background="space">🚀 Space</button>
+          <button class="world-button" type="button" data-background="candy">🍭 Candy</button>
         </div>
       </section>
     </div>

@@ -12,6 +12,24 @@ body {
   background: radial-gradient(circle at 50% 30%, #FFFDF5 0%, var(--cream) 45%, #FCEFD2 100%);
   color: var(--cocoa);
 }
+body.theme-night {
+  background: radial-gradient(circle at 50% 25%, #5b5d9a 0%, #252744 52%, #11152d 100%);
+}
+body.theme-sea {
+  background: radial-gradient(circle at 50% 25%, #e9ffff 0%, #8ed5e8 48%, #4c9fb9 100%);
+}
+body.theme-space {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255,255,255,.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 28%, rgba(255,255,255,.8) 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 70%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 35%, #4c397f 0%, #211d4f 55%, #100f2d 100%);
+}
+body.theme-candy {
+  background: radial-gradient(circle at 50% 25%, #fff6fb 0%, #ffc6dc 48%, #f29ab8 100%);
+}
+body.theme-night,
+body.theme-space { color: #FFF8E7; }
 #stage { position: fixed; inset: 0; cursor: grab; touch-action: none; }
 #stage.grabbing { cursor: grabbing; }
 .tap-reaction {
@@ -171,12 +189,14 @@ body.photo-mode .photo-tools { display: flex; }
 }
 .category-tabs {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
   width: min(100%, 600px);
 }
 .category-tab {
   flex: 1;
+  min-width: 90px;
   max-width: 190px;
   height: 42px;
   padding: 8px 16px;
@@ -242,6 +262,37 @@ body.photo-mode .photo-tools { display: flex; }
   box-shadow: 0 1px 0 var(--cocoa);
 }
 .color-preset:focus-visible {
+  outline: 3px solid var(--mint);
+  outline-offset: 2px;
+}
+.dress-up-grid,
+.world-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: min(100%, 600px);
+}
+.accessory-button,
+.world-button {
+  min-height: 52px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cocoa);
+  background: #FFFFFF;
+  border: 2px solid var(--cocoa);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--cocoa);
+}
+.accessory-button.is-selected,
+.world-button.is-selected {
+  color: #FFFFFF;
+  background: var(--cocoa);
+}
+.accessory-button:focus-visible,
+.world-button:focus-visible {
   outline: 3px solid var(--mint);
   outline-offset: 2px;
 }
@@ -348,6 +399,10 @@ body.photo-mode .photo-tools { display: flex; }
     margin-bottom: 8px;
   }
   .color-preset { min-height: 38px; padding: 6px 8px; font-size: 13px; }
+  .dress-up-grid,
+  .world-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: min(100%, 360px); }
+  .accessory-button,
+  .world-button { min-height: 42px; padding: 6px 8px; font-size: 12px; }
   .color-pick {
     height: 48px;
     font-size: 13px;

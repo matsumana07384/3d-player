@@ -153,6 +153,54 @@
   beret.add(beretTop, beretStem);
   head.add(beret);
 
+  // --- dress-up accessories ----------------------------------
+  const ribbon = new THREE.Group();
+  ribbon.position.set(-0.55, 0.58, 0.68);
+  const ribbonMat = mat(COLORS.coral, 0.7);
+  const ribbonL = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 12), ribbonMat);
+  const ribbonR = ribbonL.clone();
+  ribbonL.scale.set(1.4, 0.65, 0.25);
+  ribbonR.scale.set(1.4, 0.65, 0.25);
+  ribbonL.position.x = -0.18;
+  ribbonR.position.x = 0.18;
+  const ribbonKnot = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 10), ribbonMat);
+  ribbon.add(ribbonL, ribbonR, ribbonKnot);
+  head.add(ribbon);
+
+  const glasses = new THREE.Group();
+  glasses.position.set(0, 0.1, 0.93);
+  const glassesMat = new THREE.MeshBasicMaterial({ color: COLORS.cocoa, side: THREE.DoubleSide });
+  const lensL = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.035, 8, 24), glassesMat);
+  const lensR = lensL.clone();
+  lensL.position.x = -0.23;
+  lensR.position.x = 0.23;
+  const glassesBridge = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.035, 0.035), glassesMat);
+  glasses.add(lensL, lensR, glassesBridge);
+  head.add(glasses);
+
+  const cape = new THREE.Group();
+  cape.position.set(0, 1.45, -0.62);
+  const capeMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.8, 1.75),
+    new THREE.MeshStandardMaterial({ color: COLORS.coral, roughness: 0.8, side: THREE.DoubleSide })
+  );
+  capeMesh.position.y = -0.35;
+  cape.add(capeMesh);
+  bouncer.add(cape);
+
+  const catEars = new THREE.Group();
+  const catEarMat = mat(COLORS.caramel, 0.8);
+  const catEarL = new THREE.Mesh(new THREE.ConeGeometry(0.23, 0.65, 4), catEarMat);
+  const catEarR = catEarL.clone();
+  catEarL.position.set(-0.48, 0.92, 0);
+  catEarR.position.set(0.48, 0.92, 0);
+  catEars.add(catEarL, catEarR);
+  head.add(catEars);
+  ribbon.visible = false;
+  glasses.visible = false;
+  cape.visible = false;
+  catEars.visible = false;
+
   // arms (shoulder pivots so they can swing / wave)
   function makeArm(side) {
     const pivot = new THREE.Group();
@@ -297,6 +345,7 @@
       earR,
       beretTop,
       beretStem,
+      accessories: { beret, ribbon, glasses, cape, catEars },
       armL,
       armR,
       footL,
@@ -330,6 +379,7 @@
     eyeL, eyeR, earL, earR, beretTop, beretStem, armL, armR, footL, footR,
     footLHome, footRHome,
     tailPivot, umbrella, canopyGroup, canopy, canopyInner, rim, starMat,
+    accessories,
     umbrellaClosedScale, umbrellaOpenScale,
     umbrellaStorePos, umbrellaHeldLocalPos, umbrellaHeldLocalRot,
   } = character;
@@ -611,6 +661,35 @@
   });
   document.getElementById('btnKenkenpa').addEventListener('click', hopscotch);
 
+  const accessoryButtons = document.querySelectorAll('.accessory-button');
+  accessoryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const selected = button.dataset.accessory;
+      Object.entries(accessories).forEach(([name, group]) => {
+        group.visible = name === selected;
+      });
+      accessoryButtons.forEach((item) => item.classList.toggle('is-selected', item === button));
+    });
+  });
+
+  const backgroundThemes = {
+    day: ['#FFFDF5', '#FFF8E7', '#FCEFD2'],
+    night: ['#5B5D9A', '#252744', '#11152D'],
+    sea: ['#E9FFFF', '#8ED5E8', '#4C9FB9'],
+    space: ['#4C397F', '#211D4F', '#100F2D'],
+    candy: ['#FFF6FB', '#FFC6DC', '#F29AB8'],
+  };
+  document.querySelectorAll('.world-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const theme = button.dataset.background;
+      if (!backgroundThemes[theme]) return;
+      document.body.classList.remove(...Object.keys(backgroundThemes).map((name) => `theme-${name}`));
+      document.body.classList.add(`theme-${theme}`);
+      document.querySelectorAll('.world-button').forEach((item) =>
+        item.classList.toggle('is-selected', item === button));
+    });
+  });
+
   const frameClasses = ['', 'frame-mint', 'frame-rainbow', 'frame-stars'];
   function updatePhotoFrame() {
     photoFrame.className = `photo-frame ${frameClasses[activeFrameIndex]}`;
@@ -681,6 +760,14 @@
     return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
   }
 
+  const screenshotBackgrounds = {
+    day: ['#FFFDF5', '#FFF8E7', '#FCEFD2'],
+    night: ['#5B5D9A', '#252744', '#11152D'],
+    sea: ['#E9FFFF', '#8ED5E8', '#4C9FB9'],
+    space: ['#4C397F', '#211D4F', '#100F2D'],
+    candy: ['#FFF6FB', '#FFC6DC', '#F29AB8'],
+  };
+
   function drawPhotoDecorations(context, width, height) {
     const scaleX = width / innerWidth;
     const scaleY = height / innerHeight;
@@ -729,13 +816,15 @@
       canvas.width = renderer.domElement.width;
       canvas.height = renderer.domElement.height;
       const context = canvas.getContext('2d');
+      const activeTheme = document.body.className.match(/theme-(day|night|sea|space|candy)/)?.[1] || 'day';
+      const [backgroundTop, backgroundMiddle, backgroundBottom] = screenshotBackgrounds[activeTheme];
       const gradient = context.createRadialGradient(
         canvas.width * 0.5, canvas.height * 0.3, 0,
         canvas.width * 0.5, canvas.height * 0.3, canvas.width * 0.75
       );
-      gradient.addColorStop(0, '#FFFDF5');
-      gradient.addColorStop(0.45, '#FFF8E7');
-      gradient.addColorStop(1, '#FCEFD2');
+      gradient.addColorStop(0, backgroundTop);
+      gradient.addColorStop(0.45, backgroundMiddle);
+      gradient.addColorStop(1, backgroundBottom);
       context.fillStyle = gradient;
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(renderer.domElement, 0, 0);

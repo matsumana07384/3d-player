@@ -1,4 +1,5 @@
 import { createPompomCharacter } from '../characters/pompom.js';
+import { createTrixieCharacter } from '../characters/trixie.js';
 
 (() => {
   const THREE = window.THREE;
@@ -73,11 +74,16 @@ import { createPompomCharacter } from '../characters/pompom.js';
 
 
   // Character models live under ../characters; the player only consumes their contract.
-  const characterFactories = { pompom: createPompomCharacter };
+  const characterFactories = {
+    pompom: createPompomCharacter,
+    trixie: createTrixieCharacter,
+  };
   const queryCharacter = new URLSearchParams(location.search).get('character');
   const characterName = queryCharacter || document.body.dataset.character || 'pompom';
   const createCharacter = characterFactories[characterName] || characterFactories.pompom;
   const character = createCharacter({ THREE, scene, COLORS, mat, ball });
+  const characterTitles = { pompom: 'pompom purin?', trixie: 'Trixie' };
+  document.querySelector('header h1').textContent = characterTitles[characterName] || '3D Player';
   const {
     chara, bouncer, body, bodyColored, accentColored, head, nose, mouthMat,
     eyeL, eyeR, earL, earR, beretTop, beretStem, armL, armR, footL, footR,
@@ -258,7 +264,8 @@ import { createPompomCharacter } from '../characters/pompom.js';
   function touchScreen() { if (!isBusy()) touchT = 0; }
   function randomPlay() {
     if (isBusy()) return;
-    const actions = ['jump', 'wave', 'bothWave', 'hopscotch', 'wink', 'spin', 'headSpin', 'touch'];
+    const actions = Object.keys(actionHandlers).filter((name) => name !== 'randomPlay' && name !== 'front');
+    if (!actions.length) return;
     actionHandlers[actions[Math.floor(Math.random() * actions.length)]]();
   }
 
@@ -407,6 +414,12 @@ import { createPompomCharacter } from '../characters/pompom.js';
       umbrellaOpen: openUmbrella,
       umbrellaClose: closeUmbrella,
       umbrellaRelease: releaseUmbrella,
+    },
+    trixie: {
+      randomPlay,
+      front: faceFront,
+      jump,
+      touch: playTouch,
     },
   };
   const actionHandlers = animationProfiles[animationProfile] || animationProfiles.pompom;

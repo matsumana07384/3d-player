@@ -641,6 +641,24 @@
     rim.material.color.copy(shade);
   });
 
+  const colorPresets = {
+    pudding: { bodyColor: '#fffdf6', hatColor: '#8b5e3c', faceColor: '#5a3e2b', umbrellaColor: '#4caf50' },
+    strawberry: { bodyColor: '#fff0e8', hatColor: '#f2917e', faceColor: '#8a4a42', umbrellaColor: '#f7b5c8' },
+    sky: { bodyColor: '#effbff', hatColor: '#6c9fd8', faceColor: '#3b587a', umbrellaColor: '#8ed5e8' },
+    night: { bodyColor: '#d9d8f5', hatColor: '#3f416e', faceColor: '#252744', umbrellaColor: '#7bbf98' },
+  };
+  document.querySelectorAll('.color-preset').forEach((button) => {
+    button.addEventListener('click', () => {
+      const preset = colorPresets[button.dataset.preset];
+      if (!preset) return;
+      Object.entries(preset).forEach(([id, value]) => {
+        const input = document.getElementById(id);
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+  });
+
   // --- main loop ------------------------------------------------
   const clock = new THREE.Clock();
 

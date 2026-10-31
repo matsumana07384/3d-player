@@ -324,6 +324,10 @@ body.photo-mode .photo-tools { display: flex; }
   outline: 3px solid var(--mint);
   outline-offset: 2px;
 }
+.controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 #btnFront {
   background: var(--coral);

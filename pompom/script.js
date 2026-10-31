@@ -393,6 +393,46 @@
   let selectedStamp = '💖';
   let activeFrameIndex = 0;
   let photoStamps = [];
+  let audioContext = null;
+  let soundEnabled = localStorage.getItem('pompom-sound') !== 'muted';
+
+  const soundPatterns = {
+    tap: [{ frequency: 620, duration: 0.08, type: 'sine' }],
+    jump: [{ frequency: 460, duration: 0.1, type: 'triangle' }, { frequency: 760, duration: 0.14, type: 'triangle' }],
+    wink: [{ frequency: 720, duration: 0.09, type: 'sine' }, { frequency: 980, duration: 0.12, type: 'sine' }],
+    hopscotch: [{ frequency: 420, duration: 0.08, type: 'square' }, { frequency: 560, duration: 0.08, type: 'square' }, { frequency: 720, duration: 0.12, type: 'square' }],
+    powerSpin: [{ frequency: 220, duration: 0.16, type: 'sawtooth' }, { frequency: 330, duration: 0.18, type: 'sawtooth' }, { frequency: 520, duration: 0.22, type: 'triangle' }],
+  };
+
+  function unlockAudio() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    if (!audioContext) audioContext = new AudioContextClass();
+    if (audioContext.state === 'suspended') audioContext.resume();
+  }
+
+  function playSound(name) {
+    if (!soundEnabled) return;
+    unlockAudio();
+    if (!audioContext) return;
+    const pattern = soundPatterns[name];
+    if (!pattern) return;
+    let offset = 0;
+    pattern.forEach(({ frequency, duration, type }) => {
+      const start = audioContext.currentTime + offset;
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.055, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain).connect(audioContext.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.02);
+      offset += duration * 0.72;
+    });
+  }
 
   // 複数アニメーションの重複実行を防ぐための判定
   function isBusy() {
@@ -429,6 +469,7 @@
   function playTouch(x = innerWidth / 2, y = innerHeight / 2) {
     if (isBusy()) return;
     touchScreen();
+    playSound('tap');
     showTapReaction(x, y);
   }
 
@@ -486,7 +527,7 @@
     return 1 - Math.pow(1 - x, 3);
   }
 
-  function jump() { if (!isBusy()) jumpT = 0; }
+  function jump() { if (!isBusy()) { jumpT = 0; playSound('jump'); } }
   function spin() { if (!isBusy()) { spinT = 0; jumpT = 0; } }
   function wave() { if (!isBusy()) waveT = 0; }
   function bothWave() { if (!isBusy()) bothWaveT = 0; }
@@ -504,10 +545,11 @@
     footR.position.copy(footRHome);
     footL.rotation.set(0, 0, 0);
     footR.rotation.set(0, 0, 0);
+    playSound('hopscotch');
     setControlsHidden(true);
   }
   function takeAway() { if (!isBusy()) takeAwayT = 0; }
-  function wink() { if (!isBusy()) winkT = 0; }
+  function wink() { if (!isBusy()) { winkT = 0; playSound('wink'); } }
   function touchScreen() { if (!isBusy()) touchT = 0; }
   function randomPlay() {
     if (isBusy()) return;
@@ -619,6 +661,7 @@
     headSpinT = 0;
     headTiltHoldX = 0;
     headTiltHoldZ = 0;
+    playSound('powerSpin');
   }
   function powerSpin() {
     if (isBusy()) return;
@@ -633,6 +676,7 @@
 
   const controlsPanel = document.querySelector('.ui-bottom');
   const screenshotButton = document.getElementById('btnScreenshot');
+  const soundButton = document.getElementById('btnSound');
   const photoFrame = document.getElementById('photoFrame');
   const photoStampsLayer = document.getElementById('photoStamps');
   const photoTools = document.getElementById('photoTools');
@@ -660,6 +704,22 @@
     button.addEventListener('click', () => actionHandlers[button.dataset.action]?.());
   });
   document.getElementById('btnKenkenpa').addEventListener('click', hopscotch);
+
+  function updateSoundButton() {
+    soundButton.classList.toggle('is-muted', !soundEnabled);
+    soundButton.setAttribute('aria-pressed', String(soundEnabled));
+    soundButton.setAttribute('aria-label', soundEnabled ? '音をミュート' : '音をオン');
+    soundButton.setAttribute('title', soundEnabled ? '音をミュート' : '音をオン');
+    soundButton.querySelector('span').textContent = soundEnabled ? '🔊' : '🔇';
+  }
+  soundButton.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('pompom-sound', soundEnabled ? 'on' : 'muted');
+    if (soundEnabled) { unlockAudio(); playSound('tap'); }
+    updateSoundButton();
+  });
+  document.addEventListener('pointerdown', unlockAudio, { once: true });
+  updateSoundButton();
 
   const accessoryButtons = document.querySelectorAll('.accessory-button');
   accessoryButtons.forEach((button) => {

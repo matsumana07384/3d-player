@@ -155,7 +155,7 @@
 
   // --- dress-up accessories ----------------------------------
   const ribbon = new THREE.Group();
-  ribbon.position.set(-0.55, 0.58, 0.68);
+  ribbon.position.set(-0.55, 0.58, 0.98);
   const ribbonMat = mat(COLORS.coral, 0.7);
   const ribbonL = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 12), ribbonMat);
   const ribbonR = ribbonL.clone();

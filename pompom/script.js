@@ -67,7 +67,10 @@
     return m;
   }
 
-  // --- character ----------------------------------------------
+  // --- character presets --------------------------------------
+  // A character factory owns model construction and exposes only the parts
+  // that the common player needs for interaction and animation.
+  function createPompomCharacter() {
   const chara = new THREE.Group();   // user-rotated
   const bouncer = new THREE.Group(); // animated (jump / bob)
   chara.add(bouncer);
@@ -277,6 +280,51 @@
 
   umbrella.position.copy(umbrellaStorePos);
   scene.add(umbrella);
+
+    return {
+      chara,
+      bouncer,
+      body,
+      bodyColored,
+      accentColored,
+      head,
+      nose,
+      mouthMat,
+      eyeL,
+      eyeR,
+      earL,
+      earR,
+      beretTop,
+      beretStem,
+      armL,
+      armR,
+      footL,
+      footR,
+      tailPivot,
+      umbrella,
+      canopyGroup,
+      umbrellaClosedScale,
+      umbrellaOpenScale,
+      umbrellaStorePos,
+      umbrellaHeldLocalPos,
+      umbrellaHeldLocalRot,
+    };
+  }
+
+  // Add another factory here when a new character is introduced. The player
+  // below remains unchanged as long as the factory returns the same contract.
+  const characterFactories = {
+    pompom: createPompomCharacter,
+  };
+  const characterName = document.body.dataset.character || 'pompom';
+  const createCharacter = characterFactories[characterName] || characterFactories.pompom;
+  const character = createCharacter();
+  const {
+    chara, bouncer, body, bodyColored, accentColored, head, nose, mouthMat,
+    eyeL, eyeR, earL, earR, beretTop, beretStem, armL, armR, footL, footR,
+    tailPivot, umbrella, canopyGroup, umbrellaClosedScale, umbrellaOpenScale,
+    umbrellaStorePos, umbrellaHeldLocalPos, umbrellaHeldLocalRot,
+  } = character;
 
   // --- interaction: drag to rotate ----------------------------
   let dragging = false, moved = 0, px = 0, py = 0;

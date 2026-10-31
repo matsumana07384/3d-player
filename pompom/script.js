@@ -179,7 +179,7 @@
   head.add(glasses);
 
   const cape = new THREE.Group();
-  cape.position.set(0, 1.45, -0.62);
+  cape.position.set(0, 1.55, -1.03);
   const capeMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(1.8, 1.75),
     new THREE.MeshStandardMaterial({ color: COLORS.coral, roughness: 0.8, side: THREE.DoubleSide })
@@ -666,7 +666,7 @@
     button.addEventListener('click', () => {
       const selected = button.dataset.accessory;
       Object.entries(accessories).forEach(([name, group]) => {
-        group.visible = name === selected;
+        group.visible = name === 'beret' || name === selected;
       });
       accessoryButtons.forEach((item) => item.classList.toggle('is-selected', item === button));
     });

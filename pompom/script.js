@@ -405,6 +405,11 @@
   function takeAway() { if (!isBusy()) takeAwayT = 0; }
   function wink() { if (!isBusy()) winkT = 0; }
   function touchScreen() { if (!isBusy()) touchT = 0; }
+  function randomPlay() {
+    if (isBusy()) return;
+    const actions = [jump, wave, bothWave, kenkenpa, wink, spin, headSpin, touchScreen];
+    actions[Math.floor(Math.random() * actions.length)]();
+  }
 
   // 上空の待機位置から左手へ、傘が飛んでくる
   function beginHoldFlight() {
@@ -509,6 +514,7 @@
   const screenshotButton = document.getElementById('btnScreenshot');
   const categoryTabs = document.querySelectorAll('.category-tab');
   const categoryPanels = document.querySelectorAll('.category-panel');
+  document.getElementById('btnRandomPlay').addEventListener('click', randomPlay);
   document.getElementById('btnJump').addEventListener('click', jump);
   document.getElementById('btnTakeAway').addEventListener('click', takeAway);
   document.getElementById('btnSpin').addEventListener('click', spin);

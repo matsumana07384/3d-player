@@ -160,6 +160,9 @@ header p {
 #btnFront {
   background: var(--coral);
 }
+#btnRandomPlay {
+  background: var(--custard);
+}
 
 .color-pick {
   display: flex;
